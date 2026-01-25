@@ -1,10 +1,11 @@
-import 'package:duty_selector/widgets/students_table.dart';
 import 'package:flutter/material.dart';
 
 import 'package:duty_selector/database.dart';
+import 'package:duty_selector/design.dart';
 import 'package:duty_selector/models/student.dart';
-
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:duty_selector/utils/utils.dart';
+import 'package:duty_selector/widgets/students_table.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,23 +17,19 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final DatabaseService _databaseService = DatabaseService();
 
-  Future<List<Student>> _getStudents() async {
-    return await _databaseService.students();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    test(_databaseService);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(future: _getStudents(), builder: generateTable),
+      appBar: AppBar(
+        title: Center(
+          child: const Text('Выбрать дедурных', style: AppTextStyles.headline),
+        ),
+      ),
     );
   }
 
+  // Generate home page table widget
   Widget generateTable(
     BuildContext context,
     AsyncSnapshot<List<Student>> snapshot,
@@ -40,64 +37,73 @@ class _HomePageState extends State<HomePage> {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return const Center(child: CircularProgressIndicator());
     } else if (snapshot.connectionState == ConnectionState.done) {
-      if (snapshot.hasError) {
-        return const Text("Error");
-      }
+      if (snapshot.hasError) return const Text("Error");
     }
 
-    print(snapshot.data);
+    ItemScrollController itemScrollController = ItemScrollController();
 
-    return Center(
-      child: SingleChildScrollView(
-        child: StudentsTable(students: snapshot.data!),
-      ),
+    return Column(
+      children: [
+        SizedBox(
+          height:
+              MediaQuery.of(context).size.height * AppSpacing.tableHeightRatio,
+          child: StudentsTable(
+            students: snapshot.data!,
+            itemScrollController: itemScrollController,
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => scrollTo(itemScrollController, 20),
+          child: const Text("Выбрать дежурного", style: AppTextStyles.body),
+        ),
+        ElevatedButton(
+          onPressed: () => _selectDuty(itemScrollController, _databaseService),
+          child: const Text("Настройки", style: AppTextStyles.body),
+        ),
+        ElevatedButton(
+          onPressed: _clearDatabase,
+          child: const Text("(dev) refresh data", style: AppTextStyles.body),
+        ),
+      ],
     );
   }
-}
 
-Future<List<String>> parseNames() async {
-  final text = await rootBundle.loadString('assets/names_local.txt');
+  // Get list of students from database or parse from file
+  Future<List<Student>> _getStudents() async {
+    List<Student> studs = await _databaseService.students();
 
-  final lines = text
-      .split('\n')
-      .map((e) => e.trim())
-      .where((e) => e.isNotEmpty);
-
-  final result = <String>[];
-
-  for (final line in lines) {
-    final parts = line.split(' ');
-
-    if (parts.length < 3) {
-      throw FormatException("Wrong format");
+    if (studs.isEmpty) {
+      List<String> names = await parseNames();
+      studs = loadNamesIntoDatabase(names, _databaseService);
     }
 
-    result.add(line);
+    return studs;
   }
 
-  return result;
-}
-
-void loadNamesIntoDatabase(List<String> names, DatabaseService db) {
-  // TODO: сбросить статус тех кто дежурил вчера до "недавно", те кто больше недели "давно"
-  // TODO: разделение типов дежурства (на улице, в кабинете, в другом кабинете) / колонка "где последний раз" + история
-  for (var i = 0; i < names.length; i++) {
-    Student student = Student(
-      id: i + 1,
-      name: names[i],
-      status: DutyStatus.notOnDuty.text,
-      lastDutyDate: "Нет",
-    );
-
-    db.insertStudent(student);
+  void _clearDatabase() {
+    _databaseService.deleteAllStudents();
+    setState(() {
+      _getStudents();
+    });
   }
 }
 
-void test(DatabaseService databaseService) async {
-  final List<Student> studs = await databaseService.students();
+void _selectDuty(
+  ItemScrollController itemScrollController,
+  DatabaseService databaseService,
+) {
+  int duty = 10;
 
-  if (studs.isEmpty) {
-    List<String> names = await parseNames();
-    loadNamesIntoDatabase(names, databaseService);
-  }
+  // TODO
+
+  scrollTo(itemScrollController, duty);
+}
+
+void scrollTo(
+  ItemScrollController itemScrollController,
+  int index, {
+  Duration duration = const Duration(milliseconds: 500),
+  Curve curve = Curves.easeInOut,
+}) {
+  itemScrollController.scrollTo(index: index, duration: duration, curve: curve);
 }

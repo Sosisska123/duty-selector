@@ -99,4 +99,13 @@ class DatabaseService {
       whereArgs: [id],
     );
   }
+
+  // A method that deletes all student data from the students table.
+  Future<void> deleteAllStudents() async {
+    // Get a reference to the database.
+    final db = await database;
+
+    // Remove the Student from the database.
+    await db.delete('students');
+  }
 }

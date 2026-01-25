@@ -1,3 +1,4 @@
+import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 import 'pages/home.dart';
 
@@ -12,7 +13,7 @@ class DutySelectorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Duty Selector',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.blue)),
+      theme: getTheme(),
       home: const HomePage(),
     );
   }
