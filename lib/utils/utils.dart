@@ -32,12 +32,7 @@ List<Student> loadNamesIntoDatabase(List<String> names, DatabaseService db) {
   final students = <Student>[];
 
   for (var i = 0; i < names.length; i++) {
-    Student student = Student(
-      id: i + 1,
-      name: names[i],
-      status: DutyStatus.notOnDuty.text,
-      lastDutyDate: "Нет",
-    );
+    Student student = Student(id: i + 1, name: names[i]);
 
     students.add(student);
     db.insertStudent(student);

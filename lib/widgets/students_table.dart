@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import 'package:duty_selector/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/models/student.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class StudentsTable extends StatefulWidget {
   const StudentsTable({
@@ -22,6 +22,14 @@ class StudentsTable extends StatefulWidget {
 class _StudentsTableState extends State<StudentsTable> {
   final DatabaseService _databaseService = DatabaseService();
 
+  String date = "N/A";
+
+  void setDate(String date) {
+    setState(() {
+      this.date = date;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScrollablePositionedList.builder(
@@ -37,11 +45,7 @@ class _StudentsTableState extends State<StudentsTable> {
                 flex: 2,
                 child: Text(student.name, style: AppTextStyles.tableHeader),
               ),
-              Expanded(
-                flex: 1,
-                child: Text(student.status, style: AppTextStyles.tableHeader),
-              ),
-              Text(student.lastDutyDate, style: AppTextStyles.caption),
+              Text(date, style: AppTextStyles.caption),
             ],
           ),
           children: [
@@ -52,15 +56,18 @@ class _StudentsTableState extends State<StudentsTable> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _studentActionButton(_assignDuty, 'Назначить'),
-                      _studentActionButton(_releaseDuty, 'Отпустить'),
+                      _studentActionButton((s) => _assignDuty(s), 'Назначить'),
+                      _studentActionButton((s) => _releaseDuty(s), 'Отпустить'),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _studentActionButton(_showHistory, 'История'),
-                      _studentActionButton(_markAsNotDuty, 'Не дежурил'),
+                      _studentActionButton((s) => _showHistory(s), 'История'),
+                      _studentActionButton(
+                        (s) => _markAsNotDuty(s),
+                        'Не дежурил',
+                      ),
                     ],
                   ),
                 ],
@@ -72,27 +79,30 @@ class _StudentsTableState extends State<StudentsTable> {
     );
   }
 
-  ElevatedButton _studentActionButton(VoidCallback onPressed, String text) {
+  ElevatedButton _studentActionButton(
+    ValueSetter<Student> onPressed,
+    String text,
+  ) {
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: () => onPressed,
       style: ElevatedButton.styleFrom(minimumSize: const Size(130, 40)),
       child: Text(text),
     );
   }
 
-  void _showHistory() {
+  void _showHistory(Student student) {
     // TODO: Implement history display in a separate page
   }
 
-  void _markAsNotDuty() {
+  void _markAsNotDuty(Student student) {
     // TODO: Implement not duty mark functionality
   }
 
-  void _assignDuty() {
+  void _assignDuty(Student student) {
     // TODO: Implement duty assignment functionality
   }
 
-  void _releaseDuty() {
+  void _releaseDuty(Student student) {
     // TODO: Implement duty release functionality
   }
 }

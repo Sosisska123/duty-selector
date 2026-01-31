@@ -1,8 +1,9 @@
-import 'package:duty_selector/models/student.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+
+import 'package:duty_selector/models/student.dart';
 
 class DatabaseService {
   DatabaseService._();
@@ -10,6 +11,7 @@ class DatabaseService {
   factory DatabaseService() => _databaseService;
 
   static Database? _database;
+
   Future<Database> get database async {
     if (_database != null) return _database!;
 
@@ -29,7 +31,10 @@ class DatabaseService {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
-      'CREATE TABLE students(id INTEGER PRIMARY KEY, name TEXT, status TEXT, last_duty_date TEXT)',
+      'CREATE TABLE students(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, status TEXT, last_duty_date TEXT)',
+    );
+    await db.execute(
+      'CREATE TABLE duties(id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, date TEXT, student_id INTEGER REFERENCES students(id))',
     );
   }
 
@@ -45,7 +50,6 @@ class DatabaseService {
     );
   }
 
-  // A method that retrieves all the students from the students table.
   Future<List<Student>> students() async {
     // Get a reference to the database.
     final db = await database;
@@ -69,7 +73,6 @@ class DatabaseService {
     return Student.fromMap(maps[0]);
   }
 
-  // A method that updates a student data from the students table.
   Future<void> updateStudent(Student student) async {
     // Get a reference to the database.
     final db = await database;
@@ -85,7 +88,6 @@ class DatabaseService {
     );
   }
 
-  // A method that deletes a student data from the students table.
   Future<void> deleteStudent(int id) async {
     // Get a reference to the database.
     final db = await database;
@@ -100,12 +102,74 @@ class DatabaseService {
     );
   }
 
-  // A method that deletes all student data from the students table.
   Future<void> deleteAllStudents() async {
     // Get a reference to the database.
     final db = await database;
 
     // Remove the Student from the database.
     await db.delete('students');
+  }
+
+  Future<void> setDuty(Student student, String type, String date) async {
+    final db = await database;
+
+    await db.insert('duty', {
+      'type': type,
+      'date': date,
+      'student_id': student.id,
+    });
+  }
+
+  Future<String> getNextDuty(String type, {int count = 1}) async {
+    final db = await database;
+
+    final maps = await db.query(
+      'students',
+      where: 'type = ?',
+      whereArgs: [type],
+      limit: count,
+    );
+
+    return maps.isNotEmpty ? maps.first['name'] as String : '';
+  }
+
+  Future<String?> getLastDutyDate(int studentId) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'duty',
+      where: 'student_id = ?',
+      whereArgs: [studentId],
+      orderBy: 'date DESC',
+      limit: 1,
+    );
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return maps.first['date'] as String?;
+  }
+
+  Future<List<Map<String, dynamic>>> getHistory(int studentId) async {
+    final db = await database;
+
+    return await db.query(
+      'duty',
+      where: 'student_id = ?',
+      whereArgs: [studentId],
+    );
+  }
+
+  Future<void> deleteDuty(int id) async {
+    final db = await database;
+
+    await db.delete('duty', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteAllDuties() async {
+    final db = await database;
+
+    await db.delete('duty');
   }
 }
