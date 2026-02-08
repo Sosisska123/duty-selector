@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final DatabaseService _databaseService = DatabaseService();
+  final DutyDatabaseService _databaseService = DutyDatabaseService();
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +53,12 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         ElevatedButton(
-          onPressed: () => scrollTo(itemScrollController, 20),
+          onPressed: () =>
+              _selectDuty(context, itemScrollController, _databaseService),
           child: const Text("Выбрать дежурного", style: AppTextStyles.body),
         ),
         ElevatedButton(
-          onPressed: () => _selectDuty(itemScrollController, _databaseService),
+          onPressed: () => scrollTo(itemScrollController, 20),
           child: const Text("Настройки", style: AppTextStyles.body),
         ),
         ElevatedButton(
@@ -80,8 +81,9 @@ class _HomePageState extends State<HomePage> {
     return studs;
   }
 
-  void _clearDatabase() {
-    _databaseService.deleteAllStudents();
+  Future<void> _clearDatabase() async {
+    await _databaseService.deleteAllStudents();
+    await _databaseService.deleteAllDuties();
     setState(() {
       _getStudents();
     });
@@ -89,14 +91,51 @@ class _HomePageState extends State<HomePage> {
 }
 
 void _selectDuty(
+  BuildContext context,
   ItemScrollController itemScrollController,
-  DatabaseService databaseService,
-) {
-  int duty = 10;
+  DutyDatabaseService databaseService,
+) async {
+  // TODO: get type from shared preferences
+  final String dutyType = "кабинет";
+  final int dutiesCount = 1;
 
-  // TODO
+  final List<int> ids = await databaseService.todayDuties(
+    dutyType,
+    count: dutiesCount,
+  );
 
-  scrollTo(itemScrollController, duty);
+  if (ids.isEmpty) {
+    if (context.mounted) {
+      printSnack(context, "ERROR: $dutyType duties log is empty");
+    }
+    return;
+  }
+
+  final List<Student> students = await Future.wait(
+    ids.map((id) => databaseService.student(id)),
+  );
+
+  scrollTo(itemScrollController, ids.first);
+
+  if (context.mounted) {
+    printSnack(
+      context,
+      "$dutiesCount дежурных в $dutyType. ${students.first.name} - первый",
+    );
+  }
+
+  // Save duties in the log
+
+  final date = DateTime.now().toString().split(" ")[0];
+  await Future.wait(
+    students.map(
+      (student) => databaseService.setDuty(student, "кабинет", date),
+    ),
+  );
+}
+
+void printSnack(BuildContext context, String text) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 }
 
 void scrollTo(

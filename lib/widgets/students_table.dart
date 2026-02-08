@@ -24,12 +24,6 @@ class _StudentsTableState extends State<StudentsTable> {
 
   String date = "N/A";
 
-  void setDate(String date) {
-    setState(() {
-      this.date = date;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return ScrollablePositionedList.builder(
@@ -56,17 +50,38 @@ class _StudentsTableState extends State<StudentsTable> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _studentActionButton((s) => _assignDuty(s), 'Назначить'),
-                      _studentActionButton((s) => _releaseDuty(s), 'Отпустить'),
+                      ElevatedButton(
+                        onPressed: () => _assignDuty(student),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(130, 40),
+                        ),
+                        child: const Text('Назначить'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _releaseDuty(student),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(130, 40),
+                        ),
+                        child: const Text('Отпустить'),
+                      ),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _studentActionButton((s) => _showHistory(s), 'История'),
-                      _studentActionButton(
-                        (s) => _markAsNotDuty(s),
-                        'Не дежурил',
+                      ElevatedButton(
+                        onPressed: () => _showHistory(student),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(130, 40),
+                        ),
+                        child: const Text('История'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _markAsNotDuty(student),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(130, 40),
+                        ),
+                        child: const Text('Не дежурил'),
                       ),
                     ],
                   ),
@@ -79,15 +94,12 @@ class _StudentsTableState extends State<StudentsTable> {
     );
   }
 
-  ElevatedButton _studentActionButton(
-    ValueSetter<Student> onPressed,
-    String text,
-  ) {
-    return ElevatedButton(
-      onPressed: () => onPressed,
-      style: ElevatedButton.styleFrom(minimumSize: const Size(130, 40)),
-      child: Text(text),
-    );
+  void _assignDuty(Student student) {
+    // TODO: Implement duty assignment functionality
+  }
+
+  void _releaseDuty(Student student) {
+    // TODO: Implement duty release functionality
   }
 
   void _showHistory(Student student) {
@@ -96,13 +108,5 @@ class _StudentsTableState extends State<StudentsTable> {
 
   void _markAsNotDuty(Student student) {
     // TODO: Implement not duty mark functionality
-  }
-
-  void _assignDuty(Student student) {
-    // TODO: Implement duty assignment functionality
-  }
-
-  void _releaseDuty(Student student) {
-    // TODO: Implement duty release functionality
   }
 }

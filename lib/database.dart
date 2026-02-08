@@ -31,7 +31,7 @@ class DatabaseService {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
-      'CREATE TABLE students(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, status TEXT, last_duty_date TEXT)',
+      'CREATE TABLE students(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)',
     );
     await db.execute(
       'CREATE TABLE duties(id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, date TEXT, student_id INTEGER REFERENCES students(id))',
@@ -113,31 +113,18 @@ class DatabaseService {
   Future<void> setDuty(Student student, String type, String date) async {
     final db = await database;
 
-    await db.insert('duty', {
+    await db.insert('duties', {
       'type': type,
       'date': date,
       'student_id': student.id,
     });
   }
 
-  Future<String> getNextDuty(String type, {int count = 1}) async {
-    final db = await database;
-
-    final maps = await db.query(
-      'students',
-      where: 'type = ?',
-      whereArgs: [type],
-      limit: count,
-    );
-
-    return maps.isNotEmpty ? maps.first['name'] as String : '';
-  }
-
   Future<String?> getLastDutyDate(int studentId) async {
     final db = await database;
 
     final List<Map<String, dynamic>> maps = await db.query(
-      'duty',
+      'duties',
       where: 'student_id = ?',
       whereArgs: [studentId],
       orderBy: 'date DESC',
@@ -155,7 +142,7 @@ class DatabaseService {
     final db = await database;
 
     return await db.query(
-      'duty',
+      'duties',
       where: 'student_id = ?',
       whereArgs: [studentId],
     );
@@ -164,12 +151,38 @@ class DatabaseService {
   Future<void> deleteDuty(int id) async {
     final db = await database;
 
-    await db.delete('duty', where: 'id = ?', whereArgs: [id]);
+    await db.delete('duties', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> deleteAllDuties() async {
     final db = await database;
 
-    await db.delete('duty');
+    await db.delete('duties');
+  }
+}
+
+class DutyDatabaseService extends DatabaseService {
+  DutyDatabaseService() : super._();
+
+  Future<List<int>> todayDuties(String type, {int count = 1}) async {
+    /* Return list of student ids who have the least duties of the given type */
+    final db = await database;
+
+    // 🤯
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+      SELECT s.id, MAX(d.date) AS last_duty_date 
+      FROM students s 
+      LEFT JOIN duties d ON d.student_id = s.id AND d.type = ? 
+      GROUP BY s.id 
+      ORDER BY last_duty_date IS NOT NULL, last_duty_date ASC 
+      LIMIT ?
+      ''',
+      [type, count],
+    );
+
+    final ids = maps.map((map) => map['id'] as int).toList();
+
+    return ids;
   }
 }
