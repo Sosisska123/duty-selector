@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
         SizedBox(
           height:
               MediaQuery.of(context).size.height * AppSpacing.tableHeightRatio,
-          child: StudentsTable(
+          child: StudentTiles(
             students: snapshot.data!,
             itemScrollController: itemScrollController,
           ),

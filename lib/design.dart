@@ -30,6 +30,11 @@ ThemeData getTheme() {
         borderRadius: BorderRadius.circular(AppSpacing.small),
       ),
     ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: AppColors.primary,
+      selectedItemColor: AppColors.text,
+      unselectedItemColor: AppColors.text.withValues(alpha: 0.5),
+    ),
   );
 }
 
@@ -62,5 +67,5 @@ class AppSpacing {
   static const double small = 8.0;
   static const double medium = 16.0;
   static const double large = 24.0;
-  static const double tableHeightRatio = 0.5;
+  static const double tableHeightRatio = 0.65;
 }

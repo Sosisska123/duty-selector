@@ -5,8 +5,8 @@ import 'package:duty_selector/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/models/student.dart';
 
-class StudentsTable extends StatefulWidget {
-  const StudentsTable({
+class StudentTiles extends StatefulWidget {
+  const StudentTiles({
     super.key,
     required this.students,
     required this.itemScrollController,
@@ -16,10 +16,10 @@ class StudentsTable extends StatefulWidget {
   final ItemScrollController itemScrollController;
 
   @override
-  State<StudentsTable> createState() => _StudentsTableState();
+  State<StudentTiles> createState() => _StudentTilesState();
 }
 
-class _StudentsTableState extends State<StudentsTable> {
+class _StudentTilesState extends State<StudentTiles> {
   final DatabaseService _databaseService = DatabaseService();
 
   String date = "N/A";
