@@ -1,4 +1,6 @@
 import 'package:duty_selector/components/last_duties.dart';
+import 'package:duty_selector/components/select_duty.dart';
+import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,8 +15,16 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        minimum: EdgeInsets.symmetric(horizontal: 15),
-        child: Column(children: [LastDuties()]),
+        minimum: EdgeInsets.symmetric(horizontal: AppSpacing.medium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: AppSpacing.xlarge,
+          children: [
+            SizedBox(height: AppSpacing.medium),
+            LastDuties(),
+            SelectDuty(),
+          ],
+        ),
       ),
     );
   }
