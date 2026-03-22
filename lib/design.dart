@@ -39,27 +39,35 @@ ThemeData getTheme() {
 }
 
 class AppColors {
-  static const primary = Color(0xFF1A1A1A);
-  static const secondary = Color(0xFF1E1E1E);
-  static const background = Color(0xFF121212);
+  static const primary = Color(0xFF141414);
+  static const secondary = Color(0xFF292929);
+  static const accent = Color(0xFF4D4D4D);
+  static const background = Color(0xFF141414);
   static const text = Colors.white;
-  static const border = Color(0xFF333333);
+  static const border = Color(0xFFE0E0E1);
 }
 
 class AppTextStyles {
-  static const headline = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: AppColors.text,
-  );
   static const title = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.bold,
+    fontSize: 30,
     color: AppColors.text,
+    height: 1.1,
+    fontWeight: FontWeight.w600,
+    fontFamily: "SFPro",
   );
-  static const body = TextStyle(fontSize: 16, color: AppColors.text);
-  static const caption = TextStyle(fontSize: 12, color: AppColors.text);
-  static const tableHeader = TextStyle(fontSize: 14, color: AppColors.text);
+  static const accent = TextStyle(
+    fontSize: 20,
+    color: AppColors.accent,
+    fontWeight: FontWeight.w600,
+    fontFamily: "SFPro",
+  );
+
+  static const regular = TextStyle(
+    fontSize: 16,
+    color: AppColors.text,
+    fontFamily: "SFPro",
+    fontWeight: FontWeight.w600,
+  );
 }
 
 class AppSpacing {
@@ -67,5 +75,10 @@ class AppSpacing {
   static const double small = 8.0;
   static const double medium = 16.0;
   static const double large = 24.0;
-  static const double tableHeightRatio = 0.65;
+  static const double xlarge = 32.0;
+}
+
+class AppRadius {
+  static const double small = 4.0;
+  static const double medium = 8.0;
 }
