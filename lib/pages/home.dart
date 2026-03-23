@@ -2,19 +2,20 @@ import 'package:duty_selector/components/last_duties.dart';
 import 'package:duty_selector/components/select_duty.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: const SafeArea(
         minimum: EdgeInsets.symmetric(horizontal: AppSpacing.medium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,6 +26,15 @@ class _HomePageState extends State<HomePage> {
             SelectDuty(),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(label: "Главная", icon: Icon(Ionicons.home)),
+          BottomNavigationBarItem(label: "Записи", icon: Icon(Ionicons.list)),
+        ],
+        onTap: (index) {
+          Navigator.pushNamed(context, '/list');
+        },
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:duty_selector/design.dart';
+import 'package:duty_selector/pages/list.dart';
 import 'package:flutter/material.dart';
 import 'pages/home.dart';
 
@@ -14,7 +15,10 @@ class DutySelectorApp extends StatelessWidget {
     return MaterialApp(
       title: 'Duty Selector',
       theme: getTheme(),
-      home: const HomePage(),
+      routes: {
+        AppRoutes.home: (context) => const HomeScreen(),
+        AppRoutes.list: (context) => const ListScreen(),
+      },
     );
   }
 }
