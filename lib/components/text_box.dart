@@ -18,7 +18,7 @@ class RoundedBackgroundText extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.all(Radius.circular(AppRadius.medium)),
       ),
-      padding: EdgeInsets.all(AppSpacing.small),
+      padding: const EdgeInsets.all(AppSpacing.small),
       alignment: AlignmentGeometry.center,
       child: Text(text, style: AppTextStyles.regular),
     );

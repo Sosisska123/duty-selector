@@ -22,7 +22,7 @@ class ActionSelectionCard extends StatelessWidget {
         color: AppColors.secondary,
       ),
       child: Padding(
-        padding: EdgeInsetsGeometry.all(AppSpacing.medium),
+        padding: const EdgeInsetsGeometry.all(AppSpacing.medium),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [

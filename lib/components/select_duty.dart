@@ -13,15 +13,15 @@ class SelectDuty extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: AppSpacing.medium,
       children: [
-        TitleText(text: 'Выбрать дежурных'),
+        const TitleText(text: 'Выбрать дежурных'),
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: AppSpacing.small,
           mainAxisSpacing: AppRadius.medium,
-          padding: EdgeInsets.all(AppSpacing.xsmall),
-          children: [
+          padding: const EdgeInsets.all(AppSpacing.xsmall),
+          children: const [
             ActionSelectionCard(
               text: "Вручную",
               icon: Icon(Ionicons.barbell, color: AppColors.accent, size: 30),
