@@ -2,9 +2,10 @@ import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 
 class ActionSelectionCard extends StatelessWidget {
-  const ActionSelectionCard({super.key});
+  const ActionSelectionCard({super.key, required this.text});
 
   static const double boxSize = 30;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +16,7 @@ class ActionSelectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.medium),
         color: AppColors.secondary,
       ),
+      child: Text(text, style: AppTextStyles.regular),
     );
   }
 }
