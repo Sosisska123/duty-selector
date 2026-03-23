@@ -61,7 +61,12 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     fontFamily: "SFPro",
   );
-
+  static const regularBold = TextStyle(
+    fontSize: 17,
+    color: AppColors.text,
+    fontWeight: FontWeight.bold,
+    fontFamily: "SFPro",
+  );
   static const regular = TextStyle(
     fontSize: 16,
     color: AppColors.text,
