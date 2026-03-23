@@ -21,18 +21,20 @@ class LastDuties extends StatelessWidget {
             AccentText(text: _getCurrentDate()),
           ],
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            RoundedBackgroundText(
-              text: 'Фасхутдинов Р.А',
-              backgroundColor: AppColors.secondary,
-            ),
-            RoundedBackgroundText(
-              text: 'Фасхутдинов Р.А',
-              backgroundColor: AppColors.secondary,
-            ),
-          ],
+        SizedBox(
+          height: 40,
+          child: ListView.separated(
+            separatorBuilder: (context, index) =>
+                const SizedBox(width: AppSpacing.medium),
+            scrollDirection: Axis.horizontal,
+            itemCount: 4,
+            itemBuilder: (_, idx) {
+              return const RoundedBackgroundText(
+                text: 'Фасхутдинов Р.А',
+                backgroundColor: AppColors.secondary,
+              );
+            },
+          ),
         ),
       ],
     );

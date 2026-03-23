@@ -1,8 +1,7 @@
 import 'package:duty_selector/components/action_selection_card.dart';
-import 'package:flutter/material.dart';
-
 import 'package:duty_selector/components/title_text.dart';
 import 'package:duty_selector/design.dart';
+import 'package:flutter/material.dart';
 
 class SelectDuty extends StatelessWidget {
   const SelectDuty({super.key});
@@ -10,22 +9,22 @@ class SelectDuty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       spacing: AppSpacing.medium,
       children: [
         TitleText(text: 'Выбрать дежурных'),
-        SizedBox.fromSize(
-          size: Size.fromHeight(200),
-          child: GridView.builder(
-            padding: EdgeInsets.all(AppSpacing.small),
-            scrollDirection: Axis.vertical,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisSpacing: AppSpacing.small,
-              crossAxisCount: 2,
-            ),
-            itemBuilder: (context, index) {
-              return ActionSelectionCard();
-            },
-          ),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          crossAxisSpacing: AppSpacing.small,
+          mainAxisSpacing: AppRadius.medium,
+          padding: EdgeInsets.all(AppSpacing.xsmall),
+          children: [
+            ActionSelectionCard(text: "Вручную"),
+            ActionSelectionCard(text: "Рандом"),
+            ActionSelectionCard(text: "По списку"),
+          ],
         ),
       ],
     );
