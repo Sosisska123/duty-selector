@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:duty_selector/components/accent_text.dart';
 import 'package:duty_selector/components/title_text.dart';
+import 'package:intl/intl.dart';
 
 class LastDuties extends StatelessWidget {
   const LastDuties({super.key});
@@ -41,6 +42,10 @@ class LastDuties extends StatelessWidget {
   }
 
   String _getCurrentDate() {
-    return "21.03.26";
+    // TODO: simpliest caching in final var,
+    // get last duty date instead
+    DateTime now = DateTime.now();
+
+    return DateFormat('dd.MM.yy').format(now);
   }
 }
