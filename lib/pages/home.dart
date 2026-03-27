@@ -31,9 +31,21 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(label: "Главная", icon: Icon(Ionicons.home)),
           BottomNavigationBarItem(label: "Записи", icon: Icon(Ionicons.list)),
+          BottomNavigationBarItem(
+            label: "Настройки",
+            icon: Icon(Ionicons.settings),
+          ),
         ],
         onTap: (index) {
-          Navigator.pushNamed(context, '/list');
+          switch (index) {
+            case 0:
+              break;
+            case 1:
+              Navigator.pushNamed(context, AppRoutes.list);
+              break;
+            default:
+              break;
+          }
         },
       ),
     );
