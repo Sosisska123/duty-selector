@@ -1,8 +1,14 @@
-import 'package:duty_selector/components/action_selection_card.dart';
-import 'package:duty_selector/components/title_text.dart';
-import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
+
+import 'package:duty_selector/components/action_card.dart';
+import 'package:duty_selector/components/selection_modal.dart';
+import 'package:duty_selector/components/title_text.dart';
+
+import 'package:duty_selector/design.dart';
+
 import 'package:ionicons/ionicons.dart';
+
+enum SelectionType { byList, byHand, random }
 
 class SelectDuty extends StatelessWidget {
   const SelectDuty({super.key});
@@ -21,22 +27,46 @@ class SelectDuty extends StatelessWidget {
           crossAxisSpacing: AppSpacing.small,
           mainAxisSpacing: AppRadius.medium,
           padding: const EdgeInsets.all(AppSpacing.xsmall),
-          children: const [
-            ActionSelectionCard(
-              text: "Вручную",
+          children: [
+            ActionCard(
+              color: AppColors.secondary,
               icon: Icon(Ionicons.barbell, color: AppColors.accent, size: 30),
+              text: "Вручную",
+              tapCallback: () => _showModal(context, SelectionType.byHand),
             ),
-            ActionSelectionCard(
-              text: "Рандом",
-              icon: Icon(Ionicons.dice, color: AppColors.accent, size: 30),
-            ),
-            ActionSelectionCard(
-              text: "По списку",
+            ActionCard(
+              color: AppColors.secondary,
               icon: Icon(Ionicons.briefcase, color: AppColors.accent, size: 30),
+              text: "По списку",
+              tapCallback: () => _showModal(context, SelectionType.byList),
+            ),
+            ActionCard(
+              color: AppColors.secondary,
+              icon: Icon(Ionicons.dice, color: AppColors.accent, size: 30),
+              text: "Рандом",
+              tapCallback: () => _showModal(context, SelectionType.random),
             ),
           ],
         ),
       ],
+    );
+  }
+
+  void _showModal(BuildContext context, SelectionType type) {
+    switch (type) {
+      case SelectionType.byHand:
+        break;
+      case SelectionType.byList:
+        break;
+      case SelectionType.random:
+        break;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SelectionModal();
+      },
     );
   }
 }
