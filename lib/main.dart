@@ -12,13 +12,16 @@ class DutySelectorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Duty Selector',
-      theme: getTheme(),
-      routes: {
-        AppRoutes.home: (context) => const HomeScreen(),
-        AppRoutes.list: (context) => const ListScreen(),
-      },
+    return SafeArea(
+      minimum: EdgeInsets.symmetric(horizontal: AppSpacing.medium),
+      child: MaterialApp(
+        title: 'Duty Selector',
+        theme: getTheme(),
+        routes: {
+          AppRoutes.home: (context) => const HomeScreen(),
+          AppRoutes.list: (context) => const ListScreen(),
+        },
+      ),
     );
   }
 }

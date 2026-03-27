@@ -15,18 +15,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const SafeArea(
-        minimum: EdgeInsets.symmetric(horizontal: AppSpacing.medium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: AppSpacing.xlarge,
-          children: [
-            SizedBox(height: AppSpacing.medium),
-            LastDuties(),
-            SelectDuty(),
-          ],
-        ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: AppSpacing.xlarge,
+        children: [
+          SizedBox(height: AppSpacing.medium),
+          LastDuties(),
+          SelectDuty(),
+        ],
       ),
+
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(label: "Главная", icon: Icon(Ionicons.home)),
@@ -42,6 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
               break;
             case 1:
               Navigator.pushNamed(context, AppRoutes.list);
+              break;
+            case 2:
+              Navigator.pushNamed(context, AppRoutes.settings);
               break;
             default:
               break;
