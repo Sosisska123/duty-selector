@@ -7,6 +7,7 @@ class ActionCard extends StatelessWidget {
     required this.color,
     required this.icon,
     this.text,
+    this.descriptionText,
     this.tapCallback,
     this.longPressCallback,
   });
@@ -16,6 +17,7 @@ class ActionCard extends StatelessWidget {
   final void Function()? tapCallback;
   final void Function()? longPressCallback;
   final String? text;
+  final String? descriptionText;
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +34,7 @@ class ActionCard extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsetsGeometry.all(AppSpacing.medium),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [_generateCard()],
-            ),
+            child: _generateCard(),
           ),
         ),
       ),
@@ -43,17 +42,29 @@ class ActionCard extends StatelessWidget {
   }
 
   Widget _generateCard() {
-    Widget widget = Center(child: icon);
+    Widget widget = Center(child: Icon(icon.icon, color: icon.color, size: 80));
 
     if (text != null) {
-      widget = Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
+      widget = Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text(text!, style: AppTextStyles.regularBold),
-          icon,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+            children: [
+              Text(text!, style: AppTextStyles.regularBold),
+              icon,
+            ],
+          ),
         ],
       );
+
+      // because it doesnt make sence to leave the description without the name
+      if (descriptionText != null) {
+        (widget as Column).children.add(
+          Text(descriptionText!, style: AppTextStyles.smallAccent),
+        );
+      }
     }
 
     return widget;

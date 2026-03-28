@@ -61,6 +61,12 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     fontFamily: "SFPro",
   );
+  static const smallAccent = TextStyle(
+    fontSize: 17,
+    color: AppColors.accent,
+    fontWeight: FontWeight.w600,
+    fontFamily: "SFPro",
+  );
   static const regularBold = TextStyle(
     fontSize: 17,
     color: AppColors.text,
