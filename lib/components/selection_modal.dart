@@ -33,11 +33,7 @@ class SelectionModal extends StatelessWidget {
                   initialSelection: 1,
                   enableFilter: true,
                   textStyle: AppTextStyles.regular,
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(value: 1, label: 'На улице'),
-                    DropdownMenuEntry(value: 2, label: 'В кабинете'),
-                    DropdownMenuEntry(value: 3, label: 'Генеральная'),
-                  ],
+                  dropdownMenuEntries: _entries(),
                 ),
                 Text('Заметка (необяз.)', style: AppTextStyles.bigRegular),
                 TextField(style: AppTextStyles.regular),
@@ -48,5 +44,16 @@ class SelectionModal extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<DropdownMenuEntry<int>> _entries() {
+    List<DropdownMenuEntry<int>> entries = List.empty();
+
+    // TODO: Get entries from the file
+
+    entries.add(DropdownMenuEntry(value: 0, label: "На улице"));
+    entries.add(DropdownMenuEntry(value: 1, label: "В кабинете"));
+
+    return entries;
   }
 }

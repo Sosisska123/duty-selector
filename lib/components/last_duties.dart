@@ -1,9 +1,8 @@
+import 'package:duty_selector/components/accent_text.dart';
 import 'package:duty_selector/components/text_box.dart';
+import 'package:duty_selector/components/title_text.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
-
-import 'package:duty_selector/components/accent_text.dart';
-import 'package:duty_selector/components/title_text.dart';
 import 'package:intl/intl.dart';
 
 class LastDuties extends StatelessWidget {

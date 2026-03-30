@@ -1,14 +1,9 @@
-import 'package:flutter/material.dart';
-
 import 'package:duty_selector/components/action_card.dart';
 import 'package:duty_selector/components/selection_modal.dart';
 import 'package:duty_selector/components/title_text.dart';
-
 import 'package:duty_selector/design.dart';
-
+import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
-
-enum SelectionType { byList, byHand, random }
 
 class SelectDuty extends StatelessWidget {
   const SelectDuty({super.key});
@@ -88,3 +83,5 @@ class SelectDuty extends StatelessWidget {
     );
   }
 }
+
+enum SelectionType { byList, byHand, random }

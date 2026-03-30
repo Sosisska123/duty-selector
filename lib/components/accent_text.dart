@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-
 import 'package:duty_selector/design.dart';
+import 'package:flutter/material.dart';
 
 class AccentText extends StatelessWidget {
   final String text;

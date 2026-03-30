@@ -2,6 +2,13 @@ import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 
 class ActionCard extends StatelessWidget {
+  final Color color;
+
+  final Icon icon;
+  final void Function()? tapCallback;
+  final void Function()? longPressCallback;
+  final String? text;
+  final String? descriptionText;
   const ActionCard({
     super.key,
     required this.color,
@@ -11,13 +18,6 @@ class ActionCard extends StatelessWidget {
     this.tapCallback,
     this.longPressCallback,
   });
-
-  final Color color;
-  final Icon icon;
-  final void Function()? tapCallback;
-  final void Function()? longPressCallback;
-  final String? text;
-  final String? descriptionText;
 
   @override
   Widget build(BuildContext context) {
