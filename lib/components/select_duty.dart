@@ -28,16 +28,34 @@ class SelectDuty extends StatelessWidget {
           mainAxisSpacing: AppRadius.medium,
           padding: const EdgeInsets.all(AppSpacing.xsmall),
           children: [
+            // TODO: load from disk or smth (maybe user prefs))
             ActionCard(
               color: AppColors.secondary,
               icon: Icon(Ionicons.barbell, color: AppColors.accent, size: 30),
               text: "Вручную",
+              descriptionText: "Выбрать из списка",
               tapCallback: () => _showModal(context, SelectionType.byHand),
             ),
             ActionCard(
               color: AppColors.secondary,
-              icon: Icon(Ionicons.briefcase, color: AppColors.accent, size: 30),
-              text: "По списку",
+              icon: Icon(
+                Ionicons.male_female,
+                color: AppColors.accent,
+                size: 30,
+              ),
+              text: "Next 2",
+              descriptionText: "Следующие 2 по списку",
+              tapCallback: () => _showModal(context, SelectionType.byList),
+            ),
+            ActionCard(
+              color: AppColors.secondary,
+              icon: Icon(
+                Ionicons.transgender,
+                color: AppColors.accent,
+                size: 30,
+              ),
+              text: "Next 4",
+              descriptionText: "Следующие 4 по списку",
               tapCallback: () => _showModal(context, SelectionType.byList),
             ),
             ActionCard(
