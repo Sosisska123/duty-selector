@@ -79,6 +79,12 @@ class AppTextStyles {
     fontFamily: "SFPro",
     fontWeight: FontWeight.w600,
   );
+  static const bigRegular = TextStyle(
+    fontSize: 18,
+    color: AppColors.text,
+    fontFamily: "SFPro",
+    fontWeight: FontWeight.w600,
+  );
 }
 
 class AppSpacing {
