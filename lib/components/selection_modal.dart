@@ -10,6 +10,7 @@ class SelectionModal extends StatelessWidget {
     return Container(
       height: 1200,
       alignment: AlignmentGeometry.topCenter,
+      padding: EdgeInsetsGeometry.all(AppSpacing.medium),
       decoration: BoxDecoration(
         color: AppColors.secondary,
         borderRadius: BorderRadius.vertical(
@@ -17,25 +18,27 @@ class SelectionModal extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: EdgeInsetsGeometry.all(AppSpacing.large),
+        padding: MediaQuery.of(context).viewInsets,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-          spacing: AppSpacing.medium,
           crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: AppSpacing.medium,
           children: [
-            TitleText(text: 'Настройка выборки'),
+            Center(child: TitleText(text: 'Настройка выборки')),
             Column(
               spacing: AppSpacing.large,
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownMenu(
                   label: Text('Тип дежурства', style: AppTextStyles.regular),
                   initialSelection: 1,
                   enableFilter: true,
                   textStyle: AppTextStyles.regular,
-                  dropdownMenuEntries: _entries(),
+                  width: MediaQuery.of(context).size.width,
+                  dropdownMenuEntries: _entries().toList(),
                 ),
-                Text('Заметка (необяз.)', style: AppTextStyles.bigRegular),
+                Text('Заметка', style: AppTextStyles.bigRegular),
                 TextField(style: AppTextStyles.regular),
                 ElevatedButton(onPressed: () => {}, child: Text('Выбрать')),
               ],
@@ -47,7 +50,7 @@ class SelectionModal extends StatelessWidget {
   }
 
   List<DropdownMenuEntry<int>> _entries() {
-    List<DropdownMenuEntry<int>> entries = List.empty();
+    List<DropdownMenuEntry<int>> entries = List.empty(growable: true);
 
     // TODO: Get entries from the file
 
