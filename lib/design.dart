@@ -35,6 +35,17 @@ ThemeData getTheme() {
       selectedItemColor: AppColors.text,
       unselectedItemColor: AppColors.text.withValues(alpha: 0.5),
     ),
+    dropdownMenuTheme: DropdownMenuThemeData(
+      textStyle: TextStyle(color: AppColors.text),
+      inputDecorationTheme: InputDecorationTheme(
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+      ),
+    ),
   );
 }
 
@@ -45,6 +56,25 @@ class AppColors {
   static const background = Color(0xFF141414);
   static const text = Colors.white;
   static const border = Color(0xFFE0E0E1);
+}
+
+class AppRadius {
+  static const double small = 4.0;
+  static const double medium = 8.0;
+}
+
+class AppRoutes {
+  static const home = '/';
+  static const list = '/list';
+  static const settings = '/settings';
+}
+
+class AppSpacing {
+  static const double xsmall = 4.0;
+  static const double small = 8.0;
+  static const double medium = 16.0;
+  static const double large = 24.0;
+  static const double xlarge = 32.0;
 }
 
 class AppTextStyles {
@@ -85,23 +115,4 @@ class AppTextStyles {
     fontFamily: "SFPro",
     fontWeight: FontWeight.w600,
   );
-}
-
-class AppSpacing {
-  static const double xsmall = 4.0;
-  static const double small = 8.0;
-  static const double medium = 16.0;
-  static const double large = 24.0;
-  static const double xlarge = 32.0;
-}
-
-class AppRadius {
-  static const double small = 4.0;
-  static const double medium = 8.0;
-}
-
-class AppRoutes {
-  static const home = '/';
-  static const list = '/list';
-  static const settings = '/settings';
 }
