@@ -11,7 +11,7 @@ ThemeData getTheme() {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.background,
         foregroundColor: AppColors.text,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.small),
@@ -45,6 +45,20 @@ ThemeData getTheme() {
           borderSide: BorderSide(color: AppColors.border),
         ),
       ),
+    ),
+    inputDecorationTheme: InputDecorationThemeData(
+      filled: true,
+      fillColor: AppColors.background,
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+        borderSide: BorderSide(color: AppColors.border),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+        borderSide: BorderSide(color: AppColors.border),
+      ),
+      hintStyle: AppTextStyles.accent,
     ),
   );
 }
@@ -96,6 +110,7 @@ class AppTextStyles {
     color: AppColors.accent,
     fontWeight: FontWeight.w600,
     fontFamily: "SFPro",
+    letterSpacing: 0.1,
   );
   static const regularBold = TextStyle(
     fontSize: 17,

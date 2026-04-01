@@ -40,7 +40,7 @@ class SelectDuty extends StatelessWidget {
               ),
               text: "Next 2",
               descriptionText: "Следующие 2 по списку",
-              tapCallback: () => _showModal(context, SelectionType.byList),
+              tapCallback: () => _showModal(context, SelectionType.next2),
             ),
             ActionCard(
               color: AppColors.secondary,
@@ -51,7 +51,7 @@ class SelectDuty extends StatelessWidget {
               ),
               text: "Next 4",
               descriptionText: "Следующие 4 по списку",
-              tapCallback: () => _showModal(context, SelectionType.byList),
+              tapCallback: () => _showModal(context, SelectionType.next2),
             ),
             ActionCard(
               color: AppColors.secondary,
@@ -66,22 +66,49 @@ class SelectDuty extends StatelessWidget {
   }
 
   void _showModal(BuildContext context, SelectionType type) {
+    // FIXME: полная хуйня это все снизу
+    int peopleCount = 2;
+
     switch (type) {
-      case SelectionType.byHand:
+      case SelectionType.next2:
         break;
-      case SelectionType.byList:
+      case SelectionType.next4:
+        peopleCount = 4;
         break;
       case SelectionType.random:
+      case SelectionType.leastDuties:
+        break;
+      case SelectionType.byHand:
+        // redirect to table page
         break;
     }
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return SelectionModal();
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          snap: true,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return SelectionModal(
+              scrollController: scrollController,
+              selectionType: type,
+              peopleCount: peopleCount,
+            );
+          },
+        );
       },
     );
   }
 }
 
-enum SelectionType { byList, byHand, random }
+// FIXME: more flexible
+enum SelectionType { next2, next4, byHand, random, leastDuties }

@@ -13,6 +13,7 @@ class DutySelectorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // FIXME: safe area produces blank spaces
     return SafeArea(
       minimum: EdgeInsets.symmetric(horizontal: AppSpacing.medium),
       child: MaterialApp(
