@@ -1,6 +1,6 @@
 import 'package:duty_selector/components/action_card.dart';
 import 'package:duty_selector/components/selection_modal.dart';
-import 'package:duty_selector/components/title_text.dart';
+import 'package:duty_selector/components/texts/title_text.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -18,7 +18,6 @@ class SelectDuty extends StatelessWidget {
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: AppSpacing.small,
           mainAxisSpacing: AppRadius.medium,
           padding: const EdgeInsets.all(AppSpacing.xsmall),
@@ -66,23 +65,6 @@ class SelectDuty extends StatelessWidget {
   }
 
   void _showModal(BuildContext context, SelectionType type) {
-    // FIXME: полная хуйня это все снизу
-    int peopleCount = 2;
-
-    switch (type) {
-      case SelectionType.next2:
-        break;
-      case SelectionType.next4:
-        peopleCount = 4;
-        break;
-      case SelectionType.random:
-      case SelectionType.leastDuties:
-        break;
-      case SelectionType.byHand:
-        // redirect to table page
-        break;
-    }
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -101,7 +83,6 @@ class SelectDuty extends StatelessWidget {
             return SelectionModal(
               scrollController: scrollController,
               selectionType: type,
-              peopleCount: peopleCount,
             );
           },
         );

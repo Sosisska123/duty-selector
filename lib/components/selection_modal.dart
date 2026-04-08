@@ -1,5 +1,5 @@
 import 'package:duty_selector/components/select_duty.dart';
-import 'package:duty_selector/components/title_text.dart';
+import 'package:duty_selector/components/texts/title_text.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 
