@@ -1,3 +1,4 @@
+import 'package:duty_selector/models/student.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:path/path.dart';
@@ -34,5 +35,9 @@ class DatabaseService {
     await db.execute(
       'CREATE TABLE logs(id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER REFERENCES students(id), duty_type TEXT NOT NULL, date TEXT NOT NULL)',
     );
+  }
+
+  Future<List<Student>> get students async {
+    return List.filled(1, Student(id: 1, name: 'name'));
   }
 }

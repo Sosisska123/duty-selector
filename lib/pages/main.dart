@@ -1,3 +1,4 @@
+import 'package:duty_selector/database.dart';
 import 'package:duty_selector/pages/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -14,7 +15,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [HomeScreen(), ListScreen(), SettingsScreen()];
+  final List<Widget> _pages = [
+    HomeScreen(databaseService: DatabaseService()),
+    ListScreen(),
+    SettingsScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {

@@ -1,17 +1,21 @@
 import 'package:duty_selector/components/select_duty.dart';
 import 'package:duty_selector/components/texts/title_text.dart';
+import 'package:duty_selector/database.dart';
 import 'package:duty_selector/design.dart';
+import 'package:duty_selector/pages/students.dart';
 import 'package:flutter/material.dart';
 
 class SelectionModal extends StatelessWidget {
   final ScrollController scrollController;
   final SelectionType selectionType;
   final int peopleCount;
+  final DatabaseService databaseService;
 
   const SelectionModal({
     super.key,
     required this.scrollController,
     required this.selectionType,
+    required this.databaseService,
     this.peopleCount = 1,
   });
 
@@ -44,12 +48,14 @@ class SelectionModal extends StatelessWidget {
                   dropdownMenuEntries: _entries().toList(),
                 ),
                 SizedBox(height: AppSpacing.medium),
+                Text('Кол-во человек', style: AppTextStyles.bigRegular),
                 TextField(
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     hintText: 'Кол-во человек',
                     hintStyle: AppTextStyles.smallAccent,
                   ),
+                  style: AppTextStyles.regular,
                 ),
                 SizedBox(height: AppSpacing.medium),
                 Text('Заметка', style: AppTextStyles.bigRegular),
@@ -59,9 +65,13 @@ class SelectionModal extends StatelessWidget {
                     hintText: 'Заметка',
                     hintStyle: AppTextStyles.smallAccent,
                   ),
+                  style: AppTextStyles.regular,
                 ),
                 SizedBox(height: AppSpacing.medium),
-                ElevatedButton(onPressed: () => {}, child: Text('Выбрать')),
+                ElevatedButton(
+                  onPressed: () => _selectStudents(context),
+                  child: Text('Выбрать'),
+                ),
               ],
             ),
           ),
@@ -75,9 +85,18 @@ class SelectionModal extends StatelessWidget {
 
     // TODO: Get entries from the file
 
-    entries.add(DropdownMenuEntry(value: 0, label: "На улице"));
-    entries.add(DropdownMenuEntry(value: 1, label: "В кабинете"));
+    entries.add(const DropdownMenuEntry(value: 0, label: "На улице"));
+    entries.add(const DropdownMenuEntry(value: 1, label: "В кабинете"));
 
     return entries;
+  }
+
+  void _selectStudents(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StudentsPage(databaseService: databaseService),
+      ),
+    );
   }
 }

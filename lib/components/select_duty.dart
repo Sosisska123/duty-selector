@@ -1,12 +1,15 @@
 import 'package:duty_selector/components/action_card.dart';
 import 'package:duty_selector/components/selection_modal.dart';
 import 'package:duty_selector/components/texts/title_text.dart';
+import 'package:duty_selector/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
 class SelectDuty extends StatelessWidget {
-  const SelectDuty({super.key});
+  final DatabaseService databaseService;
+
+  const SelectDuty({super.key, required this.databaseService});
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +86,7 @@ class SelectDuty extends StatelessWidget {
             return SelectionModal(
               scrollController: scrollController,
               selectionType: type,
+              databaseService: databaseService,
             );
           },
         );
