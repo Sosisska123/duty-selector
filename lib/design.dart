@@ -89,6 +89,7 @@ class AppSpacing {
   static const double medium = 16.0;
   static const double large = 24.0;
   static const double xlarge = 32.0;
+  static const double tableHeightRatio = 0.6;
 }
 
 class AppTextStyles {

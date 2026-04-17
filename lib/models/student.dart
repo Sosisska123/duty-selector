@@ -3,21 +3,40 @@ import 'dart:convert';
 
 class Student {
   final int id;
-  final String name;
+  final String firstName;
+  final String middleName;
+  final String lastName;
 
-  const Student({required this.id, required this.name});
+  const Student({
+    required this.id,
+    required this.firstName,
+    required this.middleName,
+    required this.lastName,
+  });
+
+  String get fullName => "$firstName $middleName $lastName";
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{'id': id, 'name': name};
+    return <String, dynamic>{
+      'id': id,
+      'first_name': firstName,
+      'middle_name': middleName,
+      'last_name': lastName,
+    };
   }
 
   factory Student.fromMap(Map<String, dynamic> map) {
-    return Student(id: map['id'] as int, name: map['name'] as String);
+    return Student(
+      id: map['id'] as int,
+      firstName: map['first_name'] as String,
+      middleName: map['middle_name'] as String,
+      lastName: map['last_name'] as String,
+    );
   }
 
   @override
   String toString() {
-    return 'Student(id: $id, name: $name)';
+    return 'Student(id: $id, first_name: $firstName, middle_name: $middleName, last_name)';
   }
 
   String toJson() => json.encode(toMap());

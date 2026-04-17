@@ -1,3 +1,4 @@
+import 'package:duty_selector/components/texts/regular_text.dart';
 import 'package:duty_selector/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/models/student.dart';
@@ -25,13 +26,6 @@ class _StudentsListState extends State<StudentsList> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        students.addAll([
-          Student(id: 1, name: 'name'),
-          Student(id: 1, name: 'name1'),
-          Student(id: 1, name: 'name2'),
-          Student(id: 1, name: 'name3'),
-        ]);
-
         return ScrollablePositionedList.builder(
           itemCount: _getStudentsCount(students),
           itemBuilder: (context, index) => _buildList(context, index),
@@ -52,8 +46,7 @@ class _StudentsListState extends State<StudentsList> {
     return ExpansionTile(
       title: Row(
         children: [
-          Expanded(flex: 2, child: Text(students[index].name)),
-          Text("年"),
+          Expanded(flex: 2, child: RegularText(text: students[index].fullName)),
         ],
       ),
       children: [
