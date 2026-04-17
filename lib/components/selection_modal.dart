@@ -58,11 +58,11 @@ class SelectionModal extends StatelessWidget {
                   style: AppTextStyles.regular,
                 ),
                 SizedBox(height: AppSpacing.medium),
-                Text('Заметка', style: AppTextStyles.bigRegular),
+                Text('Примечание', style: AppTextStyles.bigRegular),
                 TextField(
                   autocorrect: true,
                   decoration: InputDecoration(
-                    hintText: 'Заметка',
+                    hintText: 'Примечание',
                     hintStyle: AppTextStyles.smallAccent,
                   ),
                   style: AppTextStyles.regular,
