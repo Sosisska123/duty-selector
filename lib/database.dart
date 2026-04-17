@@ -38,6 +38,17 @@ class DatabaseService {
   }
 
   Future<List<Student>> get students async {
-    return List.filled(1, Student(id: 1, name: 'name'));
+    final db = await database;
+
+    final results = await db.query('students', orderBy: 'first_name');
+    return results.map((row) => Student.fromMap(row)).toList();
+  }
+
+  Future<bool> addStudents(Student student) async {
+    final db = await database;
+
+    await db.insert('students', student.toMap());
+
+    return true;
   }
 }
