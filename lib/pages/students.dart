@@ -14,7 +14,7 @@ class StudentsPage extends StatefulWidget {
 }
 
 class _StudentsPageState extends State<StudentsPage> {
-  final String _excludedStudents = "";
+  final String _excludedStudents = "Загрузка...";
 
   @override
   Widget build(BuildContext context) {
