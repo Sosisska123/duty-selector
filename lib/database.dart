@@ -44,11 +44,52 @@ class DatabaseService {
     return results.map((row) => Student.fromMap(row)).toList();
   }
 
-  Future<bool> addStudents(Student student) async {
+  Future<bool> addStudent(Student student) async {
     final db = await database;
 
     await db.insert('students', student.toMap());
 
     return true;
+  }
+
+  Future<int> addStudents(List<Student> students) async {
+    final db = await database;
+    int lastRowsId = 0;
+
+    for (var student in students) {
+      lastRowsId = await db.insert(
+        'students',
+        student.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    return lastRowsId;
+  }
+
+  Future<int> addStudentsV2(List<Student> students) async {
+    final db = await database;
+    int insertedRows = 0;
+
+    insertedRows = await db.rawInsert(
+      join(
+        'INSERT INTO students (first_name, middle_name, last_name) VALUES ',
+        students
+            .map(
+              (s) => '("${s.firstName}", "${s.middleName}", "${s.lastName}")',
+            )
+            .join(', '),
+      ),
+    );
+
+    return insertedRows;
+  }
+
+  Future<int> clear() async {
+    final db = await database;
+
+    int rowsDeleted = await db.delete('students');
+
+    return rowsDeleted;
   }
 }
