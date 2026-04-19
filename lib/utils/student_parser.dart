@@ -1,6 +1,7 @@
+import 'package:duty_selector/models/student.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-Future<List<String>> parseNames() async {
+Future<List<Student>> parseNames() async {
   final text = await rootBundle.loadString('assets/names_local.txt');
 
   final lines = text
@@ -8,7 +9,7 @@ Future<List<String>> parseNames() async {
       .map((e) => e.trim())
       .where((e) => e.isNotEmpty);
 
-  final result = <String>[];
+  final result = <Student>[];
 
   for (final line in lines) {
     final parts = line.split(' ');
@@ -17,7 +18,14 @@ Future<List<String>> parseNames() async {
       throw FormatException("Wrong name format");
     }
 
-    result.add(parts.join(' '));
+    result.add(
+      Student(
+        id: 0,
+        firstName: parts[0],
+        lastName: parts[1],
+        middleName: parts[2],
+      ),
+    );
   }
 
   return result;
