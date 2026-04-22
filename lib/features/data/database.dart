@@ -68,27 +68,25 @@ class DatabaseService {
 
     // get last duty date
     var rawDate = await db.rawQuery(
-      'SELECT max(date) AS last_duty_date FROM duties',
+      'SELECT max(date) AS last_duty_date FROM duties ORDER BY date DESC LIMIT 1',
     );
-
-    logger.i('${rawDate.toString()} Raw Date');
 
     // get students from the last duty
     var rawStudents = await db.rawQuery(
-      'SELECT * from students s JOIN duties d on s.id = d.student_id WHERE d.date = (SELECT MAX(date) FROM duties);',
+      'SELECT * from students s JOIN duties d on s.id = d.student_id WHERE d.date = (SELECT MAX(date) FROM duties)',
     );
 
-    logger.i('${rawStudents.toString()} Raw Students');
+    if (rawDate.first.values.first == null || rawStudents.isEmpty) {
+      logger.i('Last duty is Null');
+      return LastDutyData(date: '', students: []);
+    }
 
-    String date = '2026-01-01';
-    List<Student> students = List.filled(
-      5,
-      Student(
-        firstName: 'firstName',
-        middleName: 'middleName',
-        lastName: 'lastName',
-      ),
-    );
+    String date = rawDate.first.values.first as String;
+    List<Student> students = rawStudents
+        .map((e) => Student.fromMap(e))
+        .toList();
+
+    logger.i('$date, ${students.toString()}');
 
     return LastDutyData(date: date, students: students);
   }

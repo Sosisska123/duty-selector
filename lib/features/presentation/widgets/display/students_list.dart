@@ -35,7 +35,7 @@ class _StudentsListState extends State<StudentsList> {
   }
 
   Future<List<Student>> _getStudents() async {
-    return await widget.databaseService.students;
+    return await widget.databaseService.getStudents();
   }
 
   int _getStudentsCount(List<Student> students) {
