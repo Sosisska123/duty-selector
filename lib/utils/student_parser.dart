@@ -19,12 +19,7 @@ Future<List<Student>> parseNames() async {
     }
 
     result.add(
-      Student(
-        id: 0,
-        firstName: parts[0],
-        lastName: parts[1],
-        middleName: parts[2],
-      ),
+      Student(middleName: parts[2], firstName: parts[0], lastName: parts[1]),
     );
   }
 

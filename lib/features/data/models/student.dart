@@ -2,23 +2,24 @@
 import 'dart:convert';
 
 class Student {
-  final int id;
+  final int? id;
   final String firstName;
   final String middleName;
   final String lastName;
 
   const Student({
-    required this.id,
+    this.id,
     required this.firstName,
     required this.middleName,
     required this.lastName,
   });
 
   String get fullName => "$firstName $middleName $lastName";
+  String get initials => "$middleName ${firstName[0]} ${lastName[0]}";
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
+      'id': id ?? -1,
       'first_name': firstName,
       'middle_name': middleName,
       'last_name': lastName,
@@ -36,7 +37,7 @@ class Student {
 
   @override
   String toString() {
-    return 'Student(id: $id, first_name: $firstName, middle_name: $middleName, last_name)';
+    return 'Student(id: $id, first_name: $firstName, middle_name: $middleName, last_name $middleName)';
   }
 
   String toJson() => json.encode(toMap());
