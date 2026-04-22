@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
         spacing: AppSpacing.xlarge,
         children: [
           SizedBox(height: AppSpacing.medium),
-          LastDuties(),
+          LastDuties(databaseService: widget.databaseService),
           SelectDuty(databaseService: widget.databaseService),
         ],
       ),
