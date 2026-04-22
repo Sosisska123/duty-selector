@@ -4,6 +4,7 @@ import 'package:duty_selector/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/pages/students.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class SelectionModal extends StatelessWidget {
   final ScrollController scrollController;
@@ -92,11 +93,10 @@ class SelectionModal extends StatelessWidget {
   }
 
   void _selectStudents(BuildContext context) {
-    Navigator.push(
+    PersistentNavBarNavigator.pushNewScreen(
       context,
-      MaterialPageRoute(
-        builder: (context) => StudentsPage(databaseService: databaseService),
-      ),
+      screen: StudentsPage(databaseService: databaseService),
+      withNavBar: false,
     );
   }
 }
