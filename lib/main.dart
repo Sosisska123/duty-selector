@@ -1,5 +1,5 @@
 import 'package:duty_selector/design.dart';
-import 'package:duty_selector/pages/main.dart';
+import 'package:duty_selector/features/presentation/screens/main.dart';
 import 'package:flutter/material.dart';
 
 void main() {

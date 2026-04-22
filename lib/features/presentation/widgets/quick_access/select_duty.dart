@@ -1,7 +1,7 @@
-import 'package:duty_selector/components/action_card.dart';
-import 'package:duty_selector/components/selection_modal.dart';
-import 'package:duty_selector/components/texts/title_text.dart';
-import 'package:duty_selector/database.dart';
+import 'package:duty_selector/features/presentation/widgets/cards/action_card.dart';
+import 'package:duty_selector/features/presentation/screens/modal/selection_modal.dart';
+import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
+import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';

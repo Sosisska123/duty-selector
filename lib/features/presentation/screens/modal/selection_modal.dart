@@ -1,8 +1,8 @@
-import 'package:duty_selector/components/select_duty.dart';
-import 'package:duty_selector/components/texts/title_text.dart';
-import 'package:duty_selector/database.dart';
+import 'package:duty_selector/features/presentation/widgets/quick_access/select_duty.dart';
+import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
+import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
-import 'package:duty_selector/pages/students.dart';
+import 'package:duty_selector/features/presentation/screens/students.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 

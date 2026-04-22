@@ -1,6 +1,6 @@
-import 'package:duty_selector/components/last_duties.dart';
-import 'package:duty_selector/components/select_duty.dart';
-import 'package:duty_selector/database.dart';
+import 'package:duty_selector/features/presentation/widgets/quick_access/last_duties.dart';
+import 'package:duty_selector/features/presentation/widgets/quick_access/select_duty.dart';
+import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 

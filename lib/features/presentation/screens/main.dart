@@ -1,10 +1,10 @@
-import 'package:duty_selector/database.dart';
+import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
-import 'package:duty_selector/pages/settings.dart';
+import 'package:duty_selector/features/presentation/screens/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:duty_selector/pages/home.dart';
-import 'package:duty_selector/pages/list.dart';
+import 'package:duty_selector/features/presentation/screens/home.dart';
+import 'package:duty_selector/features/presentation/screens/list.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class MainScreen extends StatefulWidget {

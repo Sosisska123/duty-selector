@@ -1,7 +1,7 @@
-import 'package:duty_selector/components/texts/regular_text.dart';
-import 'package:duty_selector/database.dart';
+import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
+import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
-import 'package:duty_selector/models/student.dart';
+import 'package:duty_selector/features/data/models/student.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 

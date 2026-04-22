@@ -1,4 +1,4 @@
-import 'package:duty_selector/models/student.dart';
+import 'package:duty_selector/features/data/models/student.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:path/path.dart';

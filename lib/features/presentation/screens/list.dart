@@ -1,4 +1,4 @@
-import 'package:duty_selector/database.dart';
+import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';

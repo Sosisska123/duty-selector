@@ -1,6 +1,6 @@
-import 'package:duty_selector/components/rounded_background_text.dart';
-import 'package:duty_selector/components/texts/accent_text.dart';
-import 'package:duty_selector/components/texts/title_text.dart';
+import 'package:duty_selector/features/presentation/widgets/texts/rounded_background_text.dart';
+import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
+import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
