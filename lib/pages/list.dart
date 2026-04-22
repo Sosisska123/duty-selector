@@ -1,9 +1,12 @@
+import 'package:duty_selector/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
 class ListScreen extends StatelessWidget {
-  const ListScreen({super.key});
+  const ListScreen({super.key, required this.databaseService});
+
+  final DatabaseService databaseService;
 
   @override
   Widget build(BuildContext context) {

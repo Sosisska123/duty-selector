@@ -1,9 +1,11 @@
 import 'package:duty_selector/database.dart';
+import 'package:duty_selector/design.dart';
 import 'package:duty_selector/pages/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:duty_selector/pages/home.dart';
 import 'package:duty_selector/pages/list.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,34 +15,88 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  final PersistentTabController _controller = PersistentTabController(
+    initialIndex: 0,
+  );
 
-  final List<Widget> _pages = [
-    HomeScreen(databaseService: DatabaseService()),
-    ListScreen(),
-    SettingsScreen(),
-  ];
+  final DatabaseService databaseService = DatabaseService();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(label: "Главная", icon: Icon(Ionicons.home)),
-          BottomNavigationBarItem(label: "Записи", icon: Icon(Ionicons.list)),
-          BottomNavigationBarItem(
-            label: "Настройки",
-            icon: Icon(Ionicons.settings),
-          ),
-        ],
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
+    return PersistentTabView(
+      context,
+      controller: _controller,
+      screens: _buildScreens(),
+      items: _navBarsItems(),
+      padding: const EdgeInsets.all(8),
+      confineToSafeArea: true,
+      backgroundColor: AppColors.secondary,
+      navBarHeight: kBottomNavigationBarHeight,
+      navBarStyle: NavBarStyle.style12,
     );
+  }
+
+  List<Widget> _buildScreens() {
+    return [
+      HomeScreen(databaseService: databaseService),
+      ListScreen(databaseService: databaseService),
+      SettingsScreen(databaseService: databaseService),
+    ];
+  }
+
+  List<PersistentBottomNavBarItem> _navBarsItems() {
+    return [
+      PersistentBottomNavBarItem(
+        icon: Icon(Ionicons.home),
+        activeColorPrimary: AppColors.text,
+        inactiveColorPrimary: AppColors.accent,
+        title: ("Главная"),
+        routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: "/",
+          routes: {
+            AppRoutes.home: (final context) =>
+                HomeScreen(databaseService: databaseService),
+            AppRoutes.list: (final context) =>
+                ListScreen(databaseService: databaseService),
+            AppRoutes.settings: (final context) =>
+                SettingsScreen(databaseService: databaseService),
+          },
+        ),
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Ionicons.list),
+        title: ("Записи"),
+        activeColorPrimary: AppColors.text,
+        inactiveColorPrimary: AppColors.accent,
+        routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: "/",
+          routes: {
+            AppRoutes.list: (final context) =>
+                ListScreen(databaseService: databaseService),
+            AppRoutes.home: (final context) =>
+                HomeScreen(databaseService: databaseService),
+            AppRoutes.settings: (final context) =>
+                SettingsScreen(databaseService: databaseService),
+          },
+        ),
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Ionicons.settings),
+        title: ("Настройки"),
+        activeColorPrimary: AppColors.text,
+        inactiveColorPrimary: AppColors.accent,
+        routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: "/",
+          routes: {
+            AppRoutes.settings: (final context) =>
+                SettingsScreen(databaseService: databaseService),
+            AppRoutes.list: (final context) =>
+                ListScreen(databaseService: databaseService),
+            AppRoutes.home: (final context) =>
+                HomeScreen(databaseService: databaseService),
+          },
+        ),
+      ),
+    ];
   }
 }
