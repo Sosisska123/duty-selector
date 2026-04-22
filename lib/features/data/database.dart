@@ -1,8 +1,13 @@
+import 'package:duty_selector/features/data/models/duty.dart';
+import 'package:duty_selector/features/data/models/last_duty.dart';
 import 'package:duty_selector/features/data/models/student.dart';
+import 'package:logger/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+
+var logger = Logger();
 
 class DatabaseService {
   DatabaseService._();
@@ -30,18 +35,62 @@ class DatabaseService {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
-      'CREATE TABLE students(id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT, middle_name TEXT, last_name TEXT)',
+      'CREATE TABLE IF NOT EXISTS students(id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, middle_name TEXT, last_name TEXT NOT NULL)',
     );
     await db.execute(
-      'CREATE TABLE logs(id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER REFERENCES students(id), duty_type TEXT NOT NULL, date TEXT NOT NULL)',
+      'CREATE TABLE IF NOT EXISTS duties(id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER REFERENCES students(id), duty_type TEXT NOT NULL, date TEXT NOT NULL)',
     );
+    logger.i('Database created');
   }
 
-  Future<List<Student>> get students async {
+  Future<List<Student>> getStudents() async {
     final db = await database;
 
-    final results = await db.query('students', orderBy: 'first_name');
+    final results = await db.query('students', orderBy: 'id');
+
+    logger.i('Get all students');
+
     return results.map((row) => Student.fromMap(row)).toList();
+  }
+
+  Future<List<Duty>> getDuties() async {
+    final db = await database;
+
+    final results = await db.query('duties', orderBy: 'id');
+
+    logger.i('Get all duties');
+
+    return results.map((row) => Duty.fromMap(row)).toList();
+  }
+
+  Future<LastDutyData> getLastDutyData() async {
+    final db = await database;
+
+    // get last duty date
+    var rawDate = await db.rawQuery(
+      'SELECT max(date) AS last_duty_date FROM duties',
+    );
+
+    logger.i('${rawDate.toString()} Raw Date');
+
+    // get students from the last duty
+    var rawStudents = await db.rawQuery(
+      'SELECT * from students s JOIN duties d on s.id = d.student_id WHERE d.date = (SELECT MAX(date) FROM duties);',
+    );
+
+    logger.i('${rawStudents.toString()} Raw Students');
+
+    String date = '2026-01-01';
+    List<Student> students = List.filled(
+      5,
+      Student(
+        firstName: 'firstName',
+        middleName: 'middleName',
+        lastName: 'lastName',
+      ),
+    );
+
+    return LastDutyData(date: date, students: students);
   }
 
   Future<bool> addStudent(Student student) async {
@@ -49,6 +98,7 @@ class DatabaseService {
 
     await db.insert('students', student.toMap());
 
+    logger.i('New Student Inserted ${student.fullName}');
     return true;
   }
 
@@ -63,7 +113,6 @@ class DatabaseService {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
-
     return lastRowsId;
   }
 
@@ -82,14 +131,26 @@ class DatabaseService {
       ),
     );
 
+    logger.i('Students inserted');
+
     return insertedRows;
   }
 
-  Future<int> clear() async {
+  Future<int> clear(String tableName) async {
     final db = await database;
 
-    int rowsDeleted = await db.delete('students');
+    int rowsDeleted = await db.delete(tableName);
+
+    logger.i('Table $tableName cleared');
 
     return rowsDeleted;
+  }
+
+  Future<void> dropTable(String tableName) async {
+    final db = await database;
+
+    await db.execute('DROP TABLE $tableName');
+
+    logger.i('Table $tableName dropped');
   }
 }
