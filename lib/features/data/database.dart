@@ -114,26 +114,6 @@ class DatabaseService {
     return lastRowsId;
   }
 
-  Future<int> addStudentsV2(List<Student> students) async {
-    final db = await database;
-    int insertedRows = 0;
-
-    insertedRows = await db.rawInsert(
-      join(
-        'INSERT INTO students (first_name, middle_name, last_name) VALUES ',
-        students
-            .map(
-              (s) => '("${s.firstName}", "${s.middleName}", "${s.lastName}")',
-            )
-            .join(', '),
-      ),
-    );
-
-    logger.i('Students inserted');
-
-    return insertedRows;
-  }
-
   Future<int> clear(String tableName) async {
     final db = await database;
 
