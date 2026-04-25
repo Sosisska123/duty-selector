@@ -7,15 +7,19 @@ import 'package:flutter/material.dart';
 
 class StudentsPage extends StatefulWidget {
   final DatabaseService databaseService;
-  const StudentsPage({super.key, required this.databaseService});
+  final String selectionType;
+
+  const StudentsPage({
+    super.key,
+    required this.databaseService,
+    required this.selectionType,
+  });
 
   @override
   State<StudentsPage> createState() => _StudentsPageState();
 }
 
 class _StudentsPageState extends State<StudentsPage> {
-  final String _excludedStudents = "Загрузка...";
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,13 +39,12 @@ class _StudentsPageState extends State<StudentsPage> {
                 AppSpacing.tableHeightRatio,
             child: StudentsList(databaseService: widget.databaseService),
           ),
-          RegularText(text: 'Исключить: $_excludedStudents'),
           SizedBox(height: AppSpacing.small),
           SizedBox(
             width: MediaQuery.of(context).size.width,
             child: ElevatedButton(
               onPressed: () => {},
-              child: RegularText(text: 'Выбрать'),
+              child: RegularText(text: 'Выбрать ${widget.selectionType}'),
             ),
           ),
         ],

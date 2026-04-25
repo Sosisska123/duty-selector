@@ -31,7 +31,7 @@ class SelectDuty extends StatelessWidget {
               icon: Icon(Ionicons.barbell, color: AppColors.accent, size: 30),
               text: "Вручную",
               descriptionText: "Выбрать из списка",
-              tapCallback: () => _showModal(context, SelectionType.byHand),
+              tapCallback: () => _showModal(context, "вручную"),
             ),
             ActionCard(
               color: AppColors.secondary,
@@ -42,7 +42,7 @@ class SelectDuty extends StatelessWidget {
               ),
               text: "Next 2",
               descriptionText: "Следующие 2 по списку",
-              tapCallback: () => _showModal(context, SelectionType.next2),
+              tapCallback: () => _showModal(context, "следующие 2"),
             ),
             ActionCard(
               color: AppColors.secondary,
@@ -53,13 +53,13 @@ class SelectDuty extends StatelessWidget {
               ),
               text: "Next 4",
               descriptionText: "Следующие 4 по списку",
-              tapCallback: () => _showModal(context, SelectionType.next2),
+              tapCallback: () => _showModal(context, "следующие 4"),
             ),
             ActionCard(
               color: AppColors.secondary,
               icon: Icon(Ionicons.dice, color: AppColors.accent, size: 30),
               text: "Рандом",
-              tapCallback: () => _showModal(context, SelectionType.random),
+              tapCallback: () => _showModal(context, "рандом"),
             ),
           ],
         ),
@@ -67,7 +67,7 @@ class SelectDuty extends StatelessWidget {
     );
   }
 
-  void _showModal(BuildContext context, SelectionType type) {
+  void _showModal(BuildContext context, String type) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -94,6 +94,3 @@ class SelectDuty extends StatelessWidget {
     );
   }
 }
-
-// FIXME: more flexible
-enum SelectionType { next2, next4, byHand, random, leastDuties }

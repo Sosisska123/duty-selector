@@ -16,6 +16,7 @@ class Student {
 
   String get fullName => "$firstName $surname $lastName";
   String get initials => "$surname ${firstName[0]}. ${lastName[0]}.";
+  String get initialsFirstname => "$firstName ${surname[0]}. ${lastName[0]}.";
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{

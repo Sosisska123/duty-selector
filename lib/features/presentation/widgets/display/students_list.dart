@@ -1,3 +1,4 @@
+import 'package:duty_selector/features/presentation/widgets/statuses/bordered_square.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:duty_selector/features/data/database.dart';
@@ -10,15 +11,28 @@ var logger = Logger();
 
 class StudentsList extends StatefulWidget {
   final DatabaseService databaseService;
+  final bool useCheckbox;
+  final bool moveSickPeopleAway;
+  final bool useInitials;
+  final bool useExpansionTile;
 
-  const StudentsList({super.key, required this.databaseService});
+  const StudentsList({
+    super.key,
+    required this.databaseService,
+    this.useCheckbox = true,
+    this.moveSickPeopleAway = true,
+    this.useInitials = true,
+    this.useExpansionTile = true,
+  });
 
   @override
   State<StudentsList> createState() => _StudentsListState();
 }
 
 class _StudentsListState extends State<StudentsList> {
-  List<Student> students = List.empty(growable: true);
+  List<Student> students = <Student>[];
+  Set<int> checkedStudents = <int>{};
+  Set<int> sickStudents = <int>{};
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +52,9 @@ class _StudentsListState extends State<StudentsList> {
           return const AccentText(text: 'Ошибка');
         }
 
-        students.addAll(snapshot.data!);
+        students = snapshot.data!;
 
         return ListView.builder(
-          itemCount: students.length,
           itemBuilder: (c, idx) => _buildList(context, idx),
         );
       },
@@ -53,59 +66,110 @@ class _StudentsListState extends State<StudentsList> {
   }
 
   Widget _buildList(BuildContext context, int index) {
-    return ExpansionTile(
-      title: Row(
-        children: [
-          Expanded(flex: 2, child: RegularText(text: students[index].fullName)),
-        ],
-      ),
-      children: [
-        Padding(
-          padding: EdgeInsets.all(AppSpacing.small),
-          child: Column(
+    var studentId = students[index].id!;
+    return widget.useExpansionTile
+        ? ExpansionTile(
+            key: ValueKey(studentId),
+            title: getStudentRow(studentId),
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(130, 40),
+              Padding(
+                padding: EdgeInsets.all(AppSpacing.small),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        sickStudents.contains(studentId)
+                            ? _generateButton(
+                                'Выздоровел',
+                                () => _setStudentSick(studentId, false),
+                              )
+                            : _generateButton(
+                                'Болеет (7дн.)',
+                                () => _setStudentSick(studentId, true),
+                              ),
+                        _generateButton(
+                          'История',
+                          () => _openStudentHistory(studentId),
+                        ),
+                      ],
                     ),
-                    child: const Text('Назначить'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(130, 40),
-                    ),
-                    child: const Text('Отпустить'),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(130, 40),
-                    ),
-                    child: const Text('История'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(130, 40),
-                    ),
-                    child: const Text('Не дежурил'),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
-          ),
-        ),
-      ],
-    );
+          )
+        : getStudentRow(studentId);
   }
+
+  Row getStudentRow(int index) {
+    List<Widget> children = [];
+    if (widget.useCheckbox) {
+      children.add(
+        Checkbox(
+          value: checkedStudents.contains(index),
+          onChanged: (value) {
+            setState(() {
+              if (value == true) {
+                checkedStudents.add(index);
+              } else {
+                checkedStudents.remove(index);
+              }
+            });
+          },
+        ),
+      );
+    }
+
+    children.add(
+      RegularText(
+        text: widget.useInitials
+            ? students[index].initialsFirstname
+            : students[index].fullName,
+      ),
+    );
+    if (sickStudents.contains(index)) {
+      children.add(const BorderedSquare(text: 'Б', color: Colors.green));
+    }
+    if (index == 3) {
+      children.add(const BorderedSquare(text: 'И', color: Colors.blue));
+    }
+    var preRow = Row(spacing: AppSpacing.small, children: children);
+
+    return preRow;
+  }
+
+  void _setStudentSick(int index, bool isSick) {
+    setState(() {
+      if (isSick) {
+        sickStudents.add(index);
+      } else {
+        sickStudents.remove(index);
+      }
+
+      _sortList();
+    });
+  }
+
+  void _openStudentHistory(int index) {}
+
+  void _sortList() {
+    students.sort((a, b) {
+      final aIsSick = sickStudents.contains(a.id);
+      final bIsSick = sickStudents.contains(b.id);
+
+      if (aIsSick && !bIsSick) return 1;
+      if (!aIsSick && bIsSick) return -1;
+
+      return a.id!.compareTo(b.id!);
+    });
+  }
+}
+
+ElevatedButton _generateButton(String text, Function() onPressed) {
+  return ElevatedButton(
+    onPressed: onPressed,
+    style: ElevatedButton.styleFrom(minimumSize: const Size(150, 40)),
+    child: Text(text),
+  );
 }

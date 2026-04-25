@@ -1,4 +1,3 @@
-import 'package:duty_selector/features/presentation/widgets/quick_access/select_duty.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
@@ -8,7 +7,7 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class SelectionModal extends StatelessWidget {
   final ScrollController scrollController;
-  final SelectionType selectionType;
+  final String selectionType;
   final int peopleCount;
   final DatabaseService databaseService;
 
@@ -95,7 +94,10 @@ class SelectionModal extends StatelessWidget {
   void _selectStudents(BuildContext context) {
     PersistentNavBarNavigator.pushNewScreen(
       context,
-      screen: StudentsPage(databaseService: databaseService),
+      screen: StudentsPage(
+        databaseService: databaseService,
+        selectionType: selectionType,
+      ),
       withNavBar: false,
     );
   }

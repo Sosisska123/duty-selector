@@ -131,4 +131,10 @@ class AppTextStyles {
     fontFamily: "SFPro",
     fontWeight: FontWeight.w600,
   );
+  static const inactive = TextStyle(
+    fontSize: 16,
+    color: AppColors.accent,
+    fontFamily: "SFPro",
+    fontWeight: FontWeight.w600,
+  );
 }
