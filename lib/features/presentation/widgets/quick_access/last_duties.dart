@@ -55,7 +55,7 @@ class _LastDutiesState extends State<LastDuties> {
           return const AccentText(text: 'Ошибка');
         }
 
-        return snapshot.data == null
+        return snapshot.data!.isEmpty
             ? AccentText(text: 'Пусто')
             : AccentText(
                 text: DateFormat(
@@ -83,7 +83,7 @@ class _LastDutiesState extends State<LastDuties> {
           return const AccentText(text: 'Ошибка');
         }
 
-        return s.data == null
+        return s.data!.isEmpty
             ? const AccentText(text: 'Пусто')
             : ListView.separated(
                 separatorBuilder: (context, index) =>
@@ -101,11 +101,11 @@ class _LastDutiesState extends State<LastDuties> {
     );
   }
 
-  Future<List<Student>?> _getLastDutyStudents() {
+  Future<List<Student>> _getLastDutyStudents() {
     return widget.databaseService.getLastDutyStudents();
   }
 
-  Future<String?> _getLastDutyDate() {
+  Future<String> _getLastDutyDate() {
     return widget.databaseService.getLastDutyDate();
   }
 }

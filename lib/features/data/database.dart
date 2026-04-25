@@ -62,7 +62,7 @@ class DatabaseService {
     return results.map((row) => Duty.fromMap(row)).toList();
   }
 
-  Future<String?> getLastDutyDate() async {
+  Future<String> getLastDutyDate() async {
     final db = await database;
 
     var result = await db.query(
@@ -76,14 +76,14 @@ class DatabaseService {
 
     if (text == null) {
       logger.i('Last duty date is Null');
-      return null;
+      return '';
     }
 
     logger.i('Last duty date $text');
     return text as String;
   }
 
-  Future<List<Student>?> getLastDutyStudents() async {
+  Future<List<Student>> getLastDutyStudents() async {
     final db = await database;
 
     var result = await db.rawQuery(
@@ -92,7 +92,7 @@ class DatabaseService {
 
     if (result.isEmpty) {
       logger.i('Last duty students is Null');
-      return null;
+      return [];
     }
 
     List<Student> students = result.map((e) => Student.fromMap(e)).toList();
