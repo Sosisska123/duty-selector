@@ -2,33 +2,24 @@
 import 'dart:convert';
 
 class Duty {
-  final int id;
+  final int? id;
   final String type;
-  final String date;
-  final String student;
+  final DateTime date;
+  final int studentId;
 
   Duty({
-    required this.id,
+    this.id,
     required this.type,
     required this.date,
-    required this.student,
+    required this.studentId,
   });
-
-  Duty copyWith({int? id, String? type, String? date, String? student}) {
-    return Duty(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      date: date ?? this.date,
-      student: student ?? this.student,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
       'type': type,
       'date': date,
-      'student': student,
+      'student': studentId,
     };
   }
 
@@ -36,8 +27,8 @@ class Duty {
     return Duty(
       id: map['id'] as int,
       type: map['type'] as String,
-      date: map['date'] as String,
-      student: map['student'] as String,
+      date: map['date'] as DateTime,
+      studentId: map['student'] as int,
     );
   }
 
@@ -48,6 +39,6 @@ class Duty {
 
   @override
   String toString() {
-    return 'Duty(id: $id, type: $type, date: $date, student: $student)';
+    return 'Duty(id: $id, type: $type, date: ${date.toString()}, studentId: $studentId)';
   }
 }

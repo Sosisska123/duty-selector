@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:duty_selector/features/data/database.dart';
-import 'package:duty_selector/features/data/models/last_duty.dart';
+import 'package:duty_selector/features/data/models/student.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/rounded_background_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
@@ -38,9 +38,9 @@ class _LastDutiesState extends State<LastDuties> {
     );
   }
 
-  FutureBuilder<LastDutyData> getLastDutyDateText() {
+  FutureBuilder<String?> getLastDutyDateText() {
     return FutureBuilder(
-      future: _getLastDutyData(),
+      future: _getLastDutyDate(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const AccentText(text: 'Загрузка...');
@@ -55,20 +55,20 @@ class _LastDutiesState extends State<LastDuties> {
           return const AccentText(text: 'Ошибка');
         }
 
-        return snapshot.data!.date.isEmpty
+        return snapshot.data == null
             ? AccentText(text: 'Пусто')
             : AccentText(
                 text: DateFormat(
                   'dd.MM.yy',
-                ).format(DateTime.parse(snapshot.data!.date)),
+                ).format(DateTime.parse(snapshot.data!)),
               );
       },
     );
   }
 
-  FutureBuilder<LastDutyData> getLastDutyStudents() {
+  FutureBuilder<List<Student>?> getLastDutyStudents() {
     return FutureBuilder(
-      future: _getLastDutyData(),
+      future: _getLastDutyStudents(),
       builder: (c, s) {
         if (!s.hasData) {
           return const AccentText(text: 'Загрузка...');
@@ -83,25 +83,29 @@ class _LastDutiesState extends State<LastDuties> {
           return const AccentText(text: 'Ошибка');
         }
 
-        return s.data!.students.isNotEmpty
-            ? ListView.separated(
+        return s.data == null
+            ? const AccentText(text: 'Пусто')
+            : ListView.separated(
                 separatorBuilder: (context, index) =>
                     const SizedBox(width: AppSpacing.medium),
                 scrollDirection: Axis.horizontal,
-                itemCount: s.data!.students.length,
+                itemCount: s.data!.length,
                 itemBuilder: (_, idx) {
                   return RoundedBackgroundText(
-                    text: s.data!.students[idx].initials,
+                    text: s.data![idx].initials,
                     backgroundColor: AppColors.secondary,
                   );
                 },
-              )
-            : const AccentText(text: 'Пусто');
+              );
       },
     );
   }
 
-  Future<LastDutyData> _getLastDutyData() async {
-    return await widget.databaseService.getLastDutyData();
+  Future<List<Student>?> _getLastDutyStudents() {
+    return widget.databaseService.getLastDutyStudents();
+  }
+
+  Future<String?> _getLastDutyDate() {
+    return widget.databaseService.getLastDutyDate();
   }
 }

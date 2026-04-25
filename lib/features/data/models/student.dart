@@ -19,7 +19,7 @@ class Student {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id ?? -1,
+      'id': id,
       'first_name': firstName,
       'middle_name': middleName,
       'last_name': lastName,
@@ -37,7 +37,7 @@ class Student {
 
   @override
   String toString() {
-    return 'Student(id: $id, first_name: $firstName, middle_name: $middleName, last_name $middleName)';
+    return 'Student(id: $id, first_name: $firstName, middle_name: $middleName, last_name: $lastName)';
   }
 
   String toJson() => json.encode(toMap());

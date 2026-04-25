@@ -1,5 +1,4 @@
 import 'package:duty_selector/features/data/models/duty.dart';
-import 'package:duty_selector/features/data/models/last_duty.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:logger/logger.dart';
 import 'package:sqflite/sqflite.dart';
@@ -63,32 +62,44 @@ class DatabaseService {
     return results.map((row) => Duty.fromMap(row)).toList();
   }
 
-  Future<LastDutyData> getLastDutyData() async {
+  Future<String?> getLastDutyDate() async {
     final db = await database;
 
-    // get last duty date
-    var rawDate = await db.rawQuery(
-      'SELECT max(date) AS last_duty_date FROM duties ORDER BY date DESC LIMIT 1',
+    var result = await db.query(
+      'duties',
+      columns: ['MAX(date) AS last_duty_date'],
+      orderBy: 'date DESC',
+      limit: 1,
     );
 
-    // get students from the last duty
-    var rawStudents = await db.rawQuery(
+    var text = result.first['last_duty_date'];
+
+    if (text == null) {
+      logger.i('Last duty date is Null');
+      return null;
+    }
+
+    logger.i('Last duty date $text');
+    return text as String;
+  }
+
+  Future<List<Student>?> getLastDutyStudents() async {
+    final db = await database;
+
+    var result = await db.rawQuery(
       'SELECT * from students s JOIN duties d on s.id = d.student_id WHERE d.date = (SELECT MAX(date) FROM duties)',
     );
 
-    if (rawDate.first.values.first == null || rawStudents.isEmpty) {
-      logger.i('Last duty is Null');
-      return LastDutyData(date: '', students: []);
+    if (result.isEmpty) {
+      logger.i('Last duty students is Null');
+      return null;
     }
 
-    String date = rawDate.first.values.first as String;
-    List<Student> students = rawStudents
-        .map((e) => Student.fromMap(e))
-        .toList();
+    List<Student> students = result.map((e) => Student.fromMap(e)).toList();
 
-    logger.i('$date, ${students.toString()}');
+    logger.i('Last duty students ${students.toString()}');
 
-    return LastDutyData(date: date, students: students);
+    return students;
   }
 
   Future<bool> addStudent(Student student) async {
@@ -97,6 +108,15 @@ class DatabaseService {
     await db.insert('students', student.toMap());
 
     logger.i('New Student Inserted ${student.fullName}');
+    return true;
+  }
+
+  Future<bool> addDuty(Duty duty) async {
+    final db = await database;
+
+    await db.insert('duties', duty.toMap());
+
+    logger.i('New Duty Inserted ${duty.type}');
     return true;
   }
 
@@ -118,6 +138,12 @@ class DatabaseService {
     final db = await database;
 
     int rowsDeleted = await db.delete(tableName);
+    // DELETE FROM sqlite_sequence WHERE name = 'your_table_name';
+    await db.delete(
+      'sqlite_sequence',
+      where: 'name = ?',
+      whereArgs: [tableName],
+    );
 
     logger.i('Table $tableName cleared');
 
@@ -128,6 +154,11 @@ class DatabaseService {
     final db = await database;
 
     await db.execute('DROP TABLE $tableName');
+    await db.delete(
+      'sqlite_sequence',
+      where: 'name = ?',
+      whereArgs: [tableName],
+    );
 
     logger.i('Table $tableName dropped');
   }
