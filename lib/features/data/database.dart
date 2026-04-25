@@ -29,17 +29,26 @@ class DatabaseService {
 
     final path = join(downloadPath, 'Duty Selector', 'students.db');
 
-    return await openDatabase(path, onCreate: _onCreate, version: 1);
+    return await openDatabase(
+      path,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+      version: 1,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
-      'CREATE TABLE IF NOT EXISTS students(id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, middle_name TEXT, last_name TEXT NOT NULL)',
+      'CREATE TABLE IF NOT EXISTS students(id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, surname TEXT, last_name TEXT NOT NULL)',
     );
     await db.execute(
       'CREATE TABLE IF NOT EXISTS duties(id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER REFERENCES students(id), duty_type TEXT NOT NULL, date TEXT NOT NULL)',
     );
     logger.i('Database created');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    logger.i('Migrating from $oldVersion to $newVersion');
   }
 
   Future<List<Student>> getStudents() async {
@@ -87,7 +96,7 @@ class DatabaseService {
     final db = await database;
 
     var result = await db.rawQuery(
-      'SELECT * from students s JOIN duties d on s.id = d.student_id WHERE d.date = (SELECT MAX(date) FROM duties)',
+      'SELECT s.id, s.first_name, s.surname, s.last_name FROM students s JOIN duties d ON s.id = d.student_id WHERE d.date = (SELECT MAX(date) FROM duties)',
     );
 
     if (result.isEmpty) {
@@ -116,7 +125,7 @@ class DatabaseService {
 
     await db.insert('duties', duty.toMap());
 
-    logger.i('New Duty Inserted ${duty.type}');
+    logger.i('New Duty Inserted ${duty.toString()}');
     return true;
   }
 
@@ -138,7 +147,6 @@ class DatabaseService {
     final db = await database;
 
     int rowsDeleted = await db.delete(tableName);
-    // DELETE FROM sqlite_sequence WHERE name = 'your_table_name';
     await db.delete(
       'sqlite_sequence',
       where: 'name = ?',

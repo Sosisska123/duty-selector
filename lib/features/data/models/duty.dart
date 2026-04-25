@@ -17,18 +17,18 @@ class Duty {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'type': type,
-      'date': date,
-      'student': studentId,
+      'duty_type': type,
+      'date': date.toString(),
+      'student_id': studentId,
     };
   }
 
   factory Duty.fromMap(Map<String, dynamic> map) {
     return Duty(
       id: map['id'] as int,
-      type: map['type'] as String,
-      date: map['date'] as DateTime,
-      studentId: map['student'] as int,
+      type: map['duty_type'] as String,
+      date: DateTime.parse(map['date'] as String),
+      studentId: map['student_id'] as int,
     );
   }
 

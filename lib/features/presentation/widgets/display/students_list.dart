@@ -1,9 +1,12 @@
+import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:flutter/material.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:logger/logger.dart';
+
+var logger = Logger();
 
 class StudentsList extends StatefulWidget {
   final DatabaseService databaseService;
@@ -26,9 +29,20 @@ class _StudentsListState extends State<StudentsList> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return ScrollablePositionedList.builder(
-          itemCount: _getStudentsCount(students),
-          itemBuilder: (context, index) => _buildList(context, index),
+        if (snapshot.hasError) {
+          logger.e(
+            'Error while building Students List',
+            error: snapshot.error,
+            stackTrace: snapshot.stackTrace,
+          );
+          return const AccentText(text: 'Ошибка');
+        }
+
+        students.addAll(snapshot.data!);
+
+        return ListView.builder(
+          itemCount: students.length,
+          itemBuilder: (c, idx) => _buildList(context, idx),
         );
       },
     );
@@ -36,10 +50,6 @@ class _StudentsListState extends State<StudentsList> {
 
   Future<List<Student>> _getStudents() async {
     return await widget.databaseService.getStudents();
-  }
-
-  int _getStudentsCount(List<Student> students) {
-    return students.length;
   }
 
   Widget _buildList(BuildContext context, int index) {
