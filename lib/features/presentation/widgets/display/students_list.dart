@@ -10,13 +10,16 @@ import 'package:logger/logger.dart';
 var logger = Logger();
 
 class StudentsList extends StatefulWidget {
+  final Map<int, Student> students = {};
+  final Set<int> sickStudents = <int>{};
+  final Set<int> checkedStudents = <int>{};
   final DatabaseService databaseService;
   final bool useCheckbox;
   final bool moveSickPeopleAway;
   final bool useInitials;
   final bool useExpansionTile;
 
-  const StudentsList({
+  StudentsList({
     super.key,
     required this.databaseService,
     this.useCheckbox = true,
@@ -27,13 +30,32 @@ class StudentsList extends StatefulWidget {
 
   @override
   State<StudentsList> createState() => _StudentsListState();
+
+  Set<Student> getCheckedStudents({int? limit, bool withSick = false}) {
+    Set<Student> result = {};
+
+    for (var student in students.values) {
+      if (checkedStudents.contains(student.id! - 1)) {
+        result.add(student);
+      }
+    }
+
+    return result
+        .where((e) => withSick ? true : !_isStudentSick(e.id! - 1))
+        .take(limit ?? result.length)
+        .toSet();
+  }
+
+  bool _isStudentSick(int index) {
+    return sickStudents.contains(index);
+  }
+
+  bool _isStudentImmune(int index) {
+    return index == 3;
+  }
 }
 
 class _StudentsListState extends State<StudentsList> {
-  List<Student> students = <Student>[];
-  Set<int> checkedStudents = <int>{};
-  Set<int> sickStudents = <int>{};
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -42,7 +64,6 @@ class _StudentsListState extends State<StudentsList> {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-
         if (snapshot.hasError) {
           logger.e(
             'Error while building Students List',
@@ -52,10 +73,15 @@ class _StudentsListState extends State<StudentsList> {
           return const AccentText(text: 'Ошибка');
         }
 
-        students = snapshot.data!;
+        if (widget.students.isEmpty) {
+          for (var i = 0; i < snapshot.data!.length; i++) {
+            widget.students[i] = snapshot.data![i];
+          }
+        }
 
         return ListView.builder(
-          itemBuilder: (c, idx) => _buildList(context, idx),
+          itemCount: widget.students.length,
+          itemBuilder: (c, idx) => _buildList(c, idx),
         );
       },
     );
@@ -66,54 +92,53 @@ class _StudentsListState extends State<StudentsList> {
   }
 
   Widget _buildList(BuildContext context, int index) {
-    var studentId = students[index].id!;
     return widget.useExpansionTile
-        ? ExpansionTile(
-            key: ValueKey(studentId),
-            title: getStudentRow(studentId),
-            children: [
-              Padding(
-                padding: EdgeInsets.all(AppSpacing.small),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        sickStudents.contains(studentId)
-                            ? _generateButton(
-                                'Выздоровел',
-                                () => _setStudentSick(studentId, false),
-                              )
-                            : _generateButton(
-                                'Болеет (7дн.)',
-                                () => _setStudentSick(studentId, true),
-                              ),
-                        _generateButton(
-                          'История',
-                          () => _openStudentHistory(studentId),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          )
-        : getStudentRow(studentId);
+        ? _makeStudentExpansionTile(index)
+        : _makeStudentRow(index);
   }
 
-  Row getStudentRow(int index) {
+  ExpansionTile _makeStudentExpansionTile(int index) {
+    return ExpansionTile(
+      title: _makeStudentRow(index),
+      children: [
+        Padding(
+          padding: EdgeInsets.all(AppSpacing.small),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  widget._isStudentSick(index)
+                      ? _generateButton(
+                          'Выздоровел',
+                          () => _setStudentSick(index, false),
+                        )
+                      : _generateButton(
+                          'Болеет (7дн.)',
+                          () => _setStudentSick(index, true),
+                        ),
+                  _generateButton('История', () => _openStudentHistory(index)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row _makeStudentRow(int index) {
     List<Widget> children = [];
     if (widget.useCheckbox) {
       children.add(
         Checkbox(
-          value: checkedStudents.contains(index),
+          value: widget.checkedStudents.contains(index),
           onChanged: (value) {
             setState(() {
               if (value == true) {
-                checkedStudents.add(index);
+                widget.checkedStudents.add(index);
               } else {
-                checkedStudents.remove(index);
+                widget.checkedStudents.remove(index);
               }
             });
           },
@@ -124,46 +149,31 @@ class _StudentsListState extends State<StudentsList> {
     children.add(
       RegularText(
         text: widget.useInitials
-            ? students[index].initialsFirstname
-            : students[index].fullName,
+            ? widget.students[index]!.initialsFirstname
+            : widget.students[index]!.fullName,
       ),
     );
-    if (sickStudents.contains(index)) {
+    if (widget._isStudentSick(index)) {
       children.add(const BorderedSquare(text: 'Б', color: Colors.green));
     }
-    if (index == 3) {
+    if (widget._isStudentImmune(index)) {
       children.add(const BorderedSquare(text: 'И', color: Colors.blue));
     }
-    var preRow = Row(spacing: AppSpacing.small, children: children);
 
-    return preRow;
+    return Row(spacing: AppSpacing.small, children: children);
   }
 
   void _setStudentSick(int index, bool isSick) {
     setState(() {
       if (isSick) {
-        sickStudents.add(index);
+        widget.sickStudents.add(index);
       } else {
-        sickStudents.remove(index);
+        widget.sickStudents.remove(index);
       }
-
-      _sortList();
     });
   }
 
   void _openStudentHistory(int index) {}
-
-  void _sortList() {
-    students.sort((a, b) {
-      final aIsSick = sickStudents.contains(a.id);
-      final bIsSick = sickStudents.contains(b.id);
-
-      if (aIsSick && !bIsSick) return 1;
-      if (!aIsSick && bIsSick) return -1;
-
-      return a.id!.compareTo(b.id!);
-    });
-  }
 }
 
 ElevatedButton _generateButton(String text, Function() onPressed) {
