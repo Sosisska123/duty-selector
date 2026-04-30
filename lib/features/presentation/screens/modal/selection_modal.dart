@@ -1,3 +1,4 @@
+import 'package:duty_selector/features/data/duty_selection_type.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
@@ -7,7 +8,7 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class SelectionModal extends StatelessWidget {
   final ScrollController scrollController;
-  final String selectionType;
+  final DutySelectionType selectionType;
   final int peopleCount;
   final DatabaseService databaseService;
 

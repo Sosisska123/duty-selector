@@ -1,4 +1,5 @@
-import 'package:duty_selector/features/data/models/student.dart';
+import 'package:duty_selector/features/data/duty_selection_type.dart';
+import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
 import 'package:duty_selector/features/presentation/widgets/display/students_list.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
@@ -14,7 +15,7 @@ var logger = Logger();
 
 class StudentsPage extends StatefulWidget {
   final DatabaseService databaseService;
-  final String selectionType;
+  final DutySelectionType selectionType;
 
   const StudentsPage({
     super.key,
@@ -29,7 +30,8 @@ class StudentsPage extends StatefulWidget {
 class _StudentsPageState extends State<StudentsPage> {
   @override
   Widget build(BuildContext context) {
-    var w = StudentsList(databaseService: widget.databaseService);
+    var studentsList = _generateStudentsList(widget.selectionType);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -47,17 +49,17 @@ class _StudentsPageState extends State<StudentsPage> {
             height:
                 MediaQuery.of(context).size.height *
                 AppSpacing.tableHeightRatio,
-            child: w,
+            child: studentsList,
           ),
           SizedBox(height: AppSpacing.small),
           SizedBox(
             width: MediaQuery.of(context).size.width,
             child: ElevatedButton(
-              onPressed: () => _performSelection(
-                w.getCheckedStudents(withSick: false),
-                widget.selectionType,
+              onPressed: () =>
+                  _performSelection(studentsList, widget.selectionType),
+              child: RegularText(
+                text: 'Выбрать ${widget.selectionType.name.toLowerCase()}',
               ),
-              child: RegularText(text: 'Выбрать ${widget.selectionType}'),
             ),
           ),
         ],
@@ -65,8 +67,29 @@ class _StudentsPageState extends State<StudentsPage> {
     );
   }
 
-  void _performSelection(Set<Student> selectedStudents, String selectionType) {
-    // TODO: Implement selection logic
-    logger.i('Selected students: $selectedStudents for $selectionType');
+  StudentsList _generateStudentsList(DutySelectionType type) {
+    switch (type) {
+      case DutySelectionType.byHand:
+        return StudentsList(
+          studentManager: StudentManager(widget.databaseService),
+          useCheckbox: true,
+        );
+      default:
+        break;
+    }
+    return StudentsList(studentManager: StudentManager(widget.databaseService));
+  }
+
+  void _performSelection(
+    StudentsList studentsList,
+    DutySelectionType selectionType,
+  ) {
+    int? sLimit;
+    if (selectionType == DutySelectionType.next2) sLimit = 2;
+    if (selectionType == DutySelectionType.next4) sLimit = 4;
+
+    var targetStudents = studentsList.getTargetStudents(limit: sLimit);
+
+    logger.i('Selected students: $targetStudents for $selectionType');
   }
 }

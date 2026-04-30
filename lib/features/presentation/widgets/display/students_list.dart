@@ -1,7 +1,7 @@
+import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
 import 'package:duty_selector/features/presentation/widgets/statuses/bordered_square.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
-import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:flutter/material.dart';
@@ -10,20 +10,15 @@ import 'package:logger/logger.dart';
 var logger = Logger();
 
 class StudentsList extends StatefulWidget {
-  final Map<int, Student> students = {};
-  final Set<int> sickStudents = <int>{};
-  final Set<int> checkedStudents = <int>{};
-  final DatabaseService databaseService;
+  final StudentManager studentManager;
   final bool useCheckbox;
-  final bool moveSickPeopleAway;
   final bool useInitials;
   final bool useExpansionTile;
 
-  StudentsList({
+  const StudentsList({
     super.key,
-    required this.databaseService,
-    this.useCheckbox = true,
-    this.moveSickPeopleAway = true,
+    required this.studentManager,
+    this.useCheckbox = false,
     this.useInitials = true,
     this.useExpansionTile = true,
   });
@@ -31,35 +26,15 @@ class StudentsList extends StatefulWidget {
   @override
   State<StudentsList> createState() => _StudentsListState();
 
-  Set<Student> getCheckedStudents({int? limit, bool withSick = false}) {
-    Set<Student> result = {};
-
-    for (var student in students.values) {
-      if (checkedStudents.contains(student.id! - 1)) {
-        result.add(student);
-      }
-    }
-
-    return result
-        .where((e) => withSick ? true : !_isStudentSick(e.id! - 1))
-        .take(limit ?? result.length)
-        .toSet();
-  }
-
-  bool _isStudentSick(int index) {
-    return sickStudents.contains(index);
-  }
-
-  bool _isStudentImmune(int index) {
-    return index == 3;
-  }
+  Set<Student> getTargetStudents({int? limit}) =>
+      studentManager.getTargetStudents(limit);
 }
 
 class _StudentsListState extends State<StudentsList> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _getStudents(),
+      future: widget.studentManager.getStudentsFromDB(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -73,22 +48,15 @@ class _StudentsListState extends State<StudentsList> {
           return const AccentText(text: 'Ошибка');
         }
 
-        if (widget.students.isEmpty) {
-          for (var i = 0; i < snapshot.data!.length; i++) {
-            widget.students[i] = snapshot.data![i];
-          }
-        }
+        // Important! Create an ordered Students map to work with
+        widget.studentManager.initStudentsMap(snapshot.data!);
 
         return ListView.builder(
-          itemCount: widget.students.length,
+          itemCount: widget.studentManager.len,
           itemBuilder: (c, idx) => _buildList(c, idx),
         );
       },
     );
-  }
-
-  Future<List<Student>> _getStudents() async {
-    return await widget.databaseService.getStudents();
   }
 
   Widget _buildList(BuildContext context, int index) {
@@ -108,7 +76,7 @@ class _StudentsListState extends State<StudentsList> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  widget._isStudentSick(index)
+                  _isStudentSick(index)
                       ? _generateButton(
                           'Выздоровел',
                           () => _setStudentSick(index, false),
@@ -117,8 +85,25 @@ class _StudentsListState extends State<StudentsList> {
                           'Болеет (7дн.)',
                           () => _setStudentSick(index, true),
                         ),
-                  _generateButton('История', () => _openStudentHistory(index)),
+                  _generateButton('Пропуск', () => _setStudentSkip(index)),
                 ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _generateButton(
+                    'По уважительной',
+                    () => _setStudentSkip(index, withGoodReason: true),
+                  ),
+                  _generateButton(
+                    'По заявлению',
+                    () => _setStudentSkip(index, byApplication: true),
+                  ),
+                ],
+              ),
+              _generateButton(
+                'История',
+                () => _openStudentHistory(context, index),
               ),
             ],
           ),
@@ -129,17 +114,14 @@ class _StudentsListState extends State<StudentsList> {
 
   Row _makeStudentRow(int index) {
     List<Widget> children = [];
-    if (widget.useCheckbox) {
+
+    if (widget.useCheckbox && _canBeDuty(index)) {
       children.add(
         Checkbox(
-          value: widget.checkedStudents.contains(index),
+          value: _isStudentSelected(index),
           onChanged: (value) {
             setState(() {
-              if (value == true) {
-                widget.checkedStudents.add(index);
-              } else {
-                widget.checkedStudents.remove(index);
-              }
+              _setStudentSelected(index, value ?? false);
             });
           },
         ),
@@ -149,37 +131,64 @@ class _StudentsListState extends State<StudentsList> {
     children.add(
       RegularText(
         text: widget.useInitials
-            ? widget.students[index]!.initialsFirstname
-            : widget.students[index]!.fullName,
+            ? _getStudent(index)!.initialsFirstname
+            : _getStudent(index)!.fullName,
       ),
     );
-    if (widget._isStudentSick(index)) {
+    if (_isStudentSick(index)) {
       children.add(const BorderedSquare(text: 'Б', color: Colors.green));
     }
-    if (widget._isStudentImmune(index)) {
+    if (_isStudentImmune(index)) {
       children.add(const BorderedSquare(text: 'И', color: Colors.blue));
     }
 
     return Row(spacing: AppSpacing.small, children: children);
   }
 
-  void _setStudentSick(int index, bool isSick) {
+  Student? _getStudent(int index) => widget.studentManager.getStudent(index);
+
+  bool _isStudentImmune(int index) =>
+      widget.studentManager.isStudentImmune(index);
+
+  void _setStudentSick(int index, bool isSick) => setState(() {
+    widget.studentManager.setStudentSick(index, isSick);
+  });
+
+  bool _isStudentSick(int index) => widget.studentManager.isStudentSick(index);
+
+  void _setStudentSelected(int index, bool value) =>
+      widget.studentManager.setStudentSelected(index, value);
+
+  bool _isStudentSelected(int index) =>
+      widget.studentManager.isStudentSelected(index);
+
+  void _setStudentSkip(
+    int index, {
+    bool withGoodReason = false,
+    bool byApplication = false,
+  }) => widget.studentManager.setStudentPass(
+    index,
+    withGoodReason: withGoodReason,
+    byApplication: byApplication,
+  );
+
+  void _openStudentHistory(BuildContext context, int index) {}
+
+  bool _canBeDuty(int index) =>
+      !_isStudentSick(index) && !_isStudentImmune(index);
+
+  void _selectAll(bool value) {
     setState(() {
-      if (isSick) {
-        widget.sickStudents.add(index);
-      } else {
-        widget.sickStudents.remove(index);
-      }
+      widget.studentManager.setAllSelected(value);
+      // TODO:
     });
   }
-
-  void _openStudentHistory(int index) {}
 }
 
 ElevatedButton _generateButton(String text, Function() onPressed) {
   return ElevatedButton(
     onPressed: onPressed,
-    style: ElevatedButton.styleFrom(minimumSize: const Size(150, 40)),
+    style: ElevatedButton.styleFrom(minimumSize: const Size(170, 40)),
     child: Text(text),
   );
 }

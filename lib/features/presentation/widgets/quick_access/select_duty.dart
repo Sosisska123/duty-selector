@@ -1,3 +1,4 @@
+import 'package:duty_selector/features/data/duty_selection_type.dart';
 import 'package:duty_selector/features/presentation/widgets/cards/action_card.dart';
 import 'package:duty_selector/features/presentation/screens/modal/selection_modal.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
@@ -29,9 +30,9 @@ class SelectDuty extends StatelessWidget {
             ActionCard(
               color: AppColors.secondary,
               icon: Icon(Ionicons.barbell, color: AppColors.accent, size: 30),
-              text: "Вручную",
-              descriptionText: "Выбрать из списка",
-              tapCallback: () => _showModal(context, "вручную"),
+              text: DutySelectionType.byHand.shortName,
+              descriptionText: DutySelectionType.byHand.description,
+              tapCallback: () => _showModal(context, DutySelectionType.byHand),
             ),
             ActionCard(
               color: AppColors.secondary,
@@ -40,9 +41,9 @@ class SelectDuty extends StatelessWidget {
                 color: AppColors.accent,
                 size: 30,
               ),
-              text: "Next 2",
-              descriptionText: "Следующие 2 по списку",
-              tapCallback: () => _showModal(context, "следующие 2"),
+              text: DutySelectionType.next2.shortName,
+              descriptionText: DutySelectionType.next2.description,
+              tapCallback: () => _showModal(context, DutySelectionType.next2),
             ),
             ActionCard(
               color: AppColors.secondary,
@@ -51,15 +52,16 @@ class SelectDuty extends StatelessWidget {
                 color: AppColors.accent,
                 size: 30,
               ),
-              text: "Next 4",
-              descriptionText: "Следующие 4 по списку",
-              tapCallback: () => _showModal(context, "следующие 4"),
+              text: DutySelectionType.next4.shortName,
+              descriptionText: DutySelectionType.next4.description,
+              tapCallback: () => _showModal(context, DutySelectionType.next4),
             ),
             ActionCard(
               color: AppColors.secondary,
               icon: Icon(Ionicons.dice, color: AppColors.accent, size: 30),
-              text: "Рандом",
-              tapCallback: () => _showModal(context, "рандом"),
+              text: DutySelectionType.random.shortName,
+              descriptionText: DutySelectionType.random.description,
+              tapCallback: () => _showModal(context, DutySelectionType.random),
             ),
           ],
         ),
@@ -67,7 +69,7 @@ class SelectDuty extends StatelessWidget {
     );
   }
 
-  void _showModal(BuildContext context, String type) {
+  void _showModal(BuildContext context, DutySelectionType type) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
