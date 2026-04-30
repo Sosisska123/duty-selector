@@ -1,3 +1,4 @@
+import 'package:duty_selector/features/data/student_attendance_type.dart';
 import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
 import 'package:duty_selector/features/presentation/widgets/statuses/bordered_square.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
@@ -28,6 +29,9 @@ class StudentsList extends StatefulWidget {
 
   Set<Student> getTargetStudents({int? limit}) =>
       studentManager.getTargetStudents(limit);
+
+  Map<Student, StudentAttendanceType> getExcludedStudents() =>
+      studentManager.getExcludedStudents();
 }
 
 class _StudentsListState extends State<StudentsList> {
@@ -85,20 +89,62 @@ class _StudentsListState extends State<StudentsList> {
                           'Болеет (7дн.)',
                           () => _setStudentSick(index, true),
                         ),
-                  _generateButton('Пропуск', () => _setStudentSkip(index)),
+                  _isStudentWithoutReason(index)
+                      ? _generateButton(
+                          'Пришел',
+                          () => _setStudentAttendance(
+                            index,
+                            true,
+                            StudentAttendanceType.gone,
+                          ),
+                        )
+                      : _generateButton(
+                          'Пропуск',
+                          () => _setStudentAttendance(
+                            index,
+                            false,
+                            StudentAttendanceType.gone,
+                          ),
+                        ),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _generateButton(
-                    'По уважительной',
-                    () => _setStudentSkip(index, withGoodReason: true),
-                  ),
-                  _generateButton(
-                    'По заявлению',
-                    () => _setStudentSkip(index, byApplication: true),
-                  ),
+                  _isStudentWithGoodReason(index)
+                      ? _generateButton(
+                          'Без уважительной',
+                          () => _setStudentAttendance(
+                            index,
+                            true,
+                            StudentAttendanceType.goodReason,
+                          ),
+                        )
+                      : _generateButton(
+                          'По уважительной',
+                          () => _setStudentAttendance(
+                            index,
+                            false,
+                            StudentAttendanceType.goodReason,
+                          ),
+                        ),
+                  _isStudentByApplication(index)
+                      ? _generateButton(
+                          'Без заявления',
+                          () => _setStudentAttendance(
+                            index,
+                            true,
+                            StudentAttendanceType.byApplication,
+                          ),
+                        )
+                      : _generateButton(
+                          'По заявлению',
+                          () => _setStudentAttendance(
+                            index,
+                            false,
+                            StudentAttendanceType.byApplication,
+                          ),
+                        ),
                 ],
               ),
               _generateButton(
@@ -115,7 +161,7 @@ class _StudentsListState extends State<StudentsList> {
   Row _makeStudentRow(int index) {
     List<Widget> children = [];
 
-    if (widget.useCheckbox && _canBeDuty(index)) {
+    if (widget.useCheckbox && _isStudentHere(index)) {
       children.add(
         Checkbox(
           value: _isStudentSelected(index),
@@ -141,6 +187,15 @@ class _StudentsListState extends State<StudentsList> {
     if (_isStudentImmune(index)) {
       children.add(const BorderedSquare(text: 'И', color: Colors.blue));
     }
+    if (_isStudentWithoutReason(index)) {
+      children.add(const BorderedSquare(text: 'У', color: Colors.red));
+    }
+    if (_isStudentWithGoodReason(index)) {
+      children.add(const BorderedSquare(text: 'У', color: Colors.yellow));
+    }
+    if (_isStudentByApplication(index)) {
+      children.add(const BorderedSquare(text: 'З', color: Colors.yellow));
+    }
 
     return Row(spacing: AppSpacing.small, children: children);
   }
@@ -162,27 +217,26 @@ class _StudentsListState extends State<StudentsList> {
   bool _isStudentSelected(int index) =>
       widget.studentManager.isStudentSelected(index);
 
-  void _setStudentSkip(
-    int index, {
-    bool withGoodReason = false,
-    bool byApplication = false,
-  }) => widget.studentManager.setStudentPass(
-    index,
-    withGoodReason: withGoodReason,
-    byApplication: byApplication,
-  );
+  void _setStudentAttendance(
+    int index,
+    bool attend,
+    StudentAttendanceType type,
+  ) => setState(() {
+    widget.studentManager.setStudentAttendance(index, attend, type);
+  });
 
   void _openStudentHistory(BuildContext context, int index) {}
 
-  bool _canBeDuty(int index) =>
-      !_isStudentSick(index) && !_isStudentImmune(index);
+  bool _isStudentHere(int index) => widget.studentManager.isStudentHere(index);
 
-  void _selectAll(bool value) {
-    setState(() {
-      widget.studentManager.setAllSelected(value);
-      // TODO:
-    });
-  }
+  bool _isStudentWithoutReason(int index) =>
+      widget.studentManager.isStudentWithoutReason(index);
+
+  bool _isStudentWithGoodReason(int index) =>
+      widget.studentManager.isStudentWithGoodReason(index);
+
+  bool _isStudentByApplication(int index) =>
+      widget.studentManager.isStudentByApplication(index);
 }
 
 ElevatedButton _generateButton(String text, Function() onPressed) {

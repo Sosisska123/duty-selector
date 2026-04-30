@@ -89,7 +89,9 @@ class _StudentsPageState extends State<StudentsPage> {
     if (selectionType == DutySelectionType.next4) sLimit = 4;
 
     var targetStudents = studentsList.getTargetStudents(limit: sLimit);
+    var excludedStudents = studentsList.getExcludedStudents();
 
     logger.i('Selected students: $targetStudents for $selectionType');
+    logger.i('Excluded students: $excludedStudents');
   }
 }
