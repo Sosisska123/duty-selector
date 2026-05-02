@@ -23,11 +23,10 @@ class StudentManager {
     }
   }
 
-  // TODO:
-  Set<Student> getTargetStudents(int? limit) {
+  Set<Student> getTargetStudents(int? limit, {bool includeUnselected = true}) {
     return students.entries
-        .where((e) => isStudentSelected(e.key))
         .where((e) => isStudentHere(e.key))
+        .where((e) => includeUnselected || isStudentSelected(e.key))
         .map((e) => e.value)
         .take(limit ?? len)
         .toSet();

@@ -45,6 +45,7 @@ class _StudentsPageState extends State<StudentsPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: AppSpacing.medium),
           SizedBox(
             height:
                 MediaQuery.of(context).size.height *
