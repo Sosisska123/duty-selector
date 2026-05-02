@@ -94,5 +94,13 @@ class _StudentsPageState extends State<StudentsPage> {
 
     logger.i('Selected students: $targetStudents for $selectionType');
     logger.i('Excluded students: $excludedStudents');
+
+    final snackBar = SnackBar(
+      content: Text(
+        'Выбрано ${targetStudents.map((e) => e.initials).join(', ')}',
+      ),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    PersistentNavBarNavigator.pop(context);
   }
 }

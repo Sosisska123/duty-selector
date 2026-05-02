@@ -93,6 +93,7 @@ class SelectionModal extends StatelessWidget {
   }
 
   void _selectStudents(BuildContext context) {
+    PersistentNavBarNavigator.pop(context);
     PersistentNavBarNavigator.pushNewScreen(
       context,
       screen: StudentsPage(

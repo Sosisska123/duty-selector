@@ -60,6 +60,7 @@ ThemeData getTheme() {
       ),
       hintStyle: AppTextStyles.accent,
     ),
+    snackBarTheme: SnackBarThemeData(backgroundColor: AppColors.secondary),
   );
 }
 

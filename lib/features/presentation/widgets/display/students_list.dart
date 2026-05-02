@@ -15,6 +15,7 @@ class StudentsList extends StatefulWidget {
   final bool useCheckbox;
   final bool useInitials;
   final bool useExpansionTile;
+  final bool onlyHistory;
 
   const StudentsList({
     super.key,
@@ -22,6 +23,7 @@ class StudentsList extends StatefulWidget {
     this.useCheckbox = false,
     this.useInitials = true,
     this.useExpansionTile = true,
+    this.onlyHistory = false,
   });
 
   @override
@@ -70,92 +72,109 @@ class _StudentsListState extends State<StudentsList> {
   }
 
   ExpansionTile _makeStudentExpansionTile(int index) {
-    return ExpansionTile(
-      title: _makeStudentRow(index),
-      children: [
-        Padding(
-          padding: EdgeInsets.all(AppSpacing.small),
-          child: Column(
+    return widget.onlyHistory
+        ? ExpansionTile(
+            title: _makeStudentRow(index),
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _isStudentSick(index)
-                      ? _generateButton(
-                          'Выздоровел',
-                          () => _setStudentSick(index, false),
-                        )
-                      : _generateButton(
-                          'Болеет (7дн.)',
-                          () => _setStudentSick(index, true),
-                        ),
-                  _isStudentWithoutReason(index)
-                      ? _generateButton(
-                          'Пришел',
-                          () => _setStudentAttendance(
-                            index,
-                            true,
-                            StudentAttendanceType.gone,
-                          ),
-                        )
-                      : _generateButton(
-                          'Пропуск',
-                          () => _setStudentAttendance(
-                            index,
-                            false,
-                            StudentAttendanceType.gone,
-                          ),
-                        ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _isStudentWithGoodReason(index)
-                      ? _generateButton(
-                          'Без уважительной',
-                          () => _setStudentAttendance(
-                            index,
-                            true,
-                            StudentAttendanceType.goodReason,
-                          ),
-                        )
-                      : _generateButton(
-                          'По уважительной',
-                          () => _setStudentAttendance(
-                            index,
-                            false,
-                            StudentAttendanceType.goodReason,
-                          ),
-                        ),
-                  _isStudentByApplication(index)
-                      ? _generateButton(
-                          'Без заявления',
-                          () => _setStudentAttendance(
-                            index,
-                            true,
-                            StudentAttendanceType.byApplication,
-                          ),
-                        )
-                      : _generateButton(
-                          'По заявлению',
-                          () => _setStudentAttendance(
-                            index,
-                            false,
-                            StudentAttendanceType.byApplication,
-                          ),
-                        ),
-                ],
-              ),
-              _generateButton(
-                'История',
-                () => _openStudentHistory(context, index),
+              Padding(
+                padding: EdgeInsets.all(AppSpacing.small),
+                child: Column(
+                  children: [
+                    _generateButton(
+                      'История',
+                      () => _openStudentHistory(context, index),
+                    ),
+                  ],
+                ),
               ),
             ],
-          ),
-        ),
-      ],
-    );
+          )
+        : ExpansionTile(
+            title: _makeStudentRow(index),
+            children: [
+              Padding(
+                padding: EdgeInsets.all(AppSpacing.small),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _isStudentSick(index)
+                            ? _generateButton(
+                                'Выздоровел',
+                                () => _setStudentSick(index, false),
+                              )
+                            : _generateButton(
+                                'Болеет (7дн.)',
+                                () => _setStudentSick(index, true),
+                              ),
+                        _isStudentWithoutReason(index)
+                            ? _generateButton(
+                                'Пришел',
+                                () => _setStudentAttendance(
+                                  index,
+                                  true,
+                                  StudentAttendanceType.gone,
+                                ),
+                              )
+                            : _generateButton(
+                                'Пропуск',
+                                () => _setStudentAttendance(
+                                  index,
+                                  false,
+                                  StudentAttendanceType.gone,
+                                ),
+                              ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _isStudentWithGoodReason(index)
+                            ? _generateButton(
+                                'Без уважительной',
+                                () => _setStudentAttendance(
+                                  index,
+                                  true,
+                                  StudentAttendanceType.goodReason,
+                                ),
+                              )
+                            : _generateButton(
+                                'По уважительной',
+                                () => _setStudentAttendance(
+                                  index,
+                                  false,
+                                  StudentAttendanceType.goodReason,
+                                ),
+                              ),
+                        _isStudentByApplication(index)
+                            ? _generateButton(
+                                'Без заявления',
+                                () => _setStudentAttendance(
+                                  index,
+                                  true,
+                                  StudentAttendanceType.byApplication,
+                                ),
+                              )
+                            : _generateButton(
+                                'По заявлению',
+                                () => _setStudentAttendance(
+                                  index,
+                                  false,
+                                  StudentAttendanceType.byApplication,
+                                ),
+                              ),
+                      ],
+                    ),
+                    _generateButton(
+                      'История',
+                      () => _openStudentHistory(context, index),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
   }
 
   Row _makeStudentRow(int index) {
