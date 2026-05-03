@@ -1,7 +1,6 @@
 import 'package:duty_selector/features/data/student_attendance_type.dart';
 import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
 import 'package:duty_selector/features/presentation/widgets/statuses/bordered_square.dart';
-import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/models/student.dart';
@@ -28,40 +27,14 @@ class StudentsList extends StatefulWidget {
 
   @override
   State<StudentsList> createState() => _StudentsListState();
-
-  Set<Student> getTargetStudents({int? limit}) =>
-      studentManager.getTargetStudents(limit);
-
-  Map<Student, StudentAttendanceType> getExcludedStudents() =>
-      studentManager.getExcludedStudents();
 }
 
 class _StudentsListState extends State<StudentsList> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: widget.studentManager.getStudentsFromDB(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          logger.e(
-            'Error while building Students List',
-            error: snapshot.error,
-            stackTrace: snapshot.stackTrace,
-          );
-          return const AccentText(text: 'Ошибка');
-        }
-
-        // Important! Create an ordered Students map to work with
-        widget.studentManager.initStudentsMap(snapshot.data!);
-
-        return ListView.builder(
-          itemCount: widget.studentManager.len,
-          itemBuilder: (c, idx) => _buildList(c, idx),
-        );
-      },
+    return ListView.builder(
+      itemCount: widget.studentManager.studentsMapLen,
+      itemBuilder: (c, idx) => _buildList(c, idx),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:duty_selector/features/data/duty_selection_type.dart';
 import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
 import 'package:duty_selector/features/presentation/widgets/display/students_list.dart';
+import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
 import 'package:duty_selector/features/data/database.dart';
@@ -28,9 +29,31 @@ class StudentsPage extends StatefulWidget {
 }
 
 class _StudentsPageState extends State<StudentsPage> {
+  late StudentManager manager;
+
   @override
   Widget build(BuildContext context) {
-    var studentsList = _generateStudentsList(widget.selectionType);
+    var studentsList = FutureBuilder(
+      future: _generateStudentsList(widget.selectionType),
+      builder: (c, s) {
+        if (!s.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (s.hasError) {
+          logger.e(
+            'Error while building Students List',
+            error: s.error,
+            stackTrace: s.stackTrace,
+          );
+          return const AccentText(text: 'Ошибка');
+        }
+
+        return s.data ??
+            StudentsList(
+              studentManager: StudentManager(widget.databaseService),
+            );
+      },
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -56,8 +79,7 @@ class _StudentsPageState extends State<StudentsPage> {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             child: ElevatedButton(
-              onPressed: () =>
-                  _performSelection(studentsList, widget.selectionType),
+              onPressed: () => _performSelection(widget.selectionType),
               child: RegularText(
                 text: 'Выбрать ${widget.selectionType.name.toLowerCase()}',
               ),
@@ -68,29 +90,23 @@ class _StudentsPageState extends State<StudentsPage> {
     );
   }
 
-  StudentsList _generateStudentsList(DutySelectionType type) {
-    switch (type) {
-      case DutySelectionType.byHand:
-        return StudentsList(
-          studentManager: StudentManager(widget.databaseService),
-          useCheckbox: true,
-        );
-      default:
-        break;
+  Future<StudentsList> _generateStudentsList(DutySelectionType type) async {
+    manager.initStudentsMap(await manager.getStudentsFromDB());
+    manager.addSickStudentsFromDB();
+
+    if (type == DutySelectionType.byHand || type == DutySelectionType.random) {
+      return StudentsList(studentManager: manager, useCheckbox: true);
     }
-    return StudentsList(studentManager: StudentManager(widget.databaseService));
+    return StudentsList(studentManager: manager);
   }
 
-  void _performSelection(
-    StudentsList studentsList,
-    DutySelectionType selectionType,
-  ) {
+  void _performSelection(DutySelectionType selectionType) {
     int? sLimit;
     if (selectionType == DutySelectionType.next2) sLimit = 2;
     if (selectionType == DutySelectionType.next4) sLimit = 4;
 
-    var targetStudents = studentsList.getTargetStudents(limit: sLimit);
-    var excludedStudents = studentsList.getExcludedStudents();
+    var targetStudents = manager.getTargetStudents(sLimit);
+    var excludedStudents = manager.getExcludedStudents();
 
     logger.i('Selected students: $targetStudents for $selectionType');
     logger.i('Excluded students: $excludedStudents');

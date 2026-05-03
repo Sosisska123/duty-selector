@@ -28,7 +28,7 @@ class StudentManager {
         .where((e) => isStudentHere(e.key))
         .where((e) => includeUnselected || isStudentSelected(e.key))
         .map((e) => e.value)
-        .take(limit ?? len)
+        .take(limit ?? studentsMapLen)
         .toSet();
   }
 
@@ -166,7 +166,7 @@ class StudentManager {
     return database.getStudents();
   }
 
-  Future<dynamic> getSickStudentsFromDB() async {
+  Future<dynamic> addSickStudentsFromDB() async {
     // TODO: var sickStudents = database.getSickStudents();
     // addAll(sickStudents ids: StudentAttendanceType.sick)
   }
@@ -183,7 +183,7 @@ class StudentManager {
     }
   }
 
-  int get len {
+  int get studentsMapLen {
     return students.length;
   }
 
@@ -194,5 +194,5 @@ class StudentManager {
       );
 
   bool isIndexValid(int index) =>
-      (students.isEmpty || index > len) ? false : true;
+      (students.isEmpty || index > studentsMapLen) ? false : true;
 }

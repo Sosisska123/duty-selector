@@ -62,7 +62,10 @@ class ListScreen extends StatelessWidget {
         PersistentNavBarNavigator.pushNewScreen(context, screen: DutyList());
         break;
       case 'group':
-        PersistentNavBarNavigator.pushNewScreen(context, screen: GroupList());
+        PersistentNavBarNavigator.pushNewScreen(
+          context,
+          screen: GroupList(databaseService: databaseService),
+        );
         break;
       default:
     }
