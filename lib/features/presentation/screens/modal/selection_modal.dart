@@ -49,16 +49,16 @@ class SelectionModal extends StatelessWidget {
                   dropdownMenuEntries: _entries().toList(),
                 ),
                 SizedBox(height: AppSpacing.medium),
-                Text('Кол-во человек', style: AppTextStyles.bigRegular),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Кол-во человек',
-                    hintStyle: AppTextStyles.smallAccent,
-                  ),
-                  style: AppTextStyles.regular,
-                ),
-                SizedBox(height: AppSpacing.medium),
+                // Text('Кол-во человек', style: AppTextStyles.bigRegular),
+                // TextField(
+                //   keyboardType: TextInputType.number,
+                //   decoration: InputDecoration(
+                //     hintText: 'Кол-во человек',
+                //     hintStyle: AppTextStyles.smallAccent,
+                //   ),
+                //   style: AppTextStyles.regular,
+                // ),
+                // SizedBox(height: AppSpacing.medium),
                 Text('Примечание', style: AppTextStyles.bigRegular),
                 TextField(
                   autocorrect: true,
