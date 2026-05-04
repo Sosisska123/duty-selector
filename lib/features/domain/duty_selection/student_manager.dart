@@ -162,7 +162,7 @@ class StudentManager {
     );
   }
 
-  Future<dynamic> getStudentsFromDB() async {
+  Future<List<Student>> getStudentsFromDB() async {
     return database.getStudents();
   }
 

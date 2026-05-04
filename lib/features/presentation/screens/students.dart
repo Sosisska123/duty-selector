@@ -29,12 +29,16 @@ class StudentsPage extends StatefulWidget {
 }
 
 class _StudentsPageState extends State<StudentsPage> {
-  late StudentManager manager;
+  StudentManager initManager() {
+    return StudentManager(widget.databaseService);
+  }
 
   @override
   Widget build(BuildContext context) {
+    var manager = initManager();
+
     var studentsList = FutureBuilder(
-      future: _generateStudentsList(widget.selectionType),
+      future: _generateStudentsList(manager, widget.selectionType),
       builder: (c, s) {
         if (!s.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -79,7 +83,7 @@ class _StudentsPageState extends State<StudentsPage> {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             child: ElevatedButton(
-              onPressed: () => _performSelection(widget.selectionType),
+              onPressed: () => _performSelection(manager, widget.selectionType),
               child: RegularText(
                 text: 'Выбрать ${widget.selectionType.name.toLowerCase()}',
               ),
@@ -90,17 +94,25 @@ class _StudentsPageState extends State<StudentsPage> {
     );
   }
 
-  Future<StudentsList> _generateStudentsList(DutySelectionType type) async {
-    manager.initStudentsMap(await manager.getStudentsFromDB());
+  Future<StudentsList> _generateStudentsList(
+    StudentManager manager,
+    DutySelectionType type,
+  ) async {
+    final r = await manager.getStudentsFromDB();
+    manager.initStudentsMap(r);
     manager.addSickStudentsFromDB();
 
     if (type == DutySelectionType.byHand || type == DutySelectionType.random) {
       return StudentsList(studentManager: manager, useCheckbox: true);
     }
+
     return StudentsList(studentManager: manager);
   }
 
-  void _performSelection(DutySelectionType selectionType) {
+  void _performSelection(
+    StudentManager manager,
+    DutySelectionType selectionType,
+  ) {
     int? sLimit;
     if (selectionType == DutySelectionType.next2) sLimit = 2;
     if (selectionType == DutySelectionType.next4) sLimit = 4;
