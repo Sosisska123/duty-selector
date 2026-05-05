@@ -1,4 +1,4 @@
-import 'package:duty_selector/features/data/student_attendance_type.dart';
+import 'package:duty_selector/features/data/absence_type.dart';
 import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
 import 'package:duty_selector/features/presentation/widgets/statuses/bordered_square.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
@@ -87,7 +87,7 @@ class _StudentsListState extends State<StudentsList> {
                                 () => _setStudentAttendance(
                                   index,
                                   true,
-                                  StudentAttendanceType.gone,
+                                  AbsenceType.gone,
                                 ),
                               )
                             : _generateButton(
@@ -95,7 +95,7 @@ class _StudentsListState extends State<StudentsList> {
                                 () => _setStudentAttendance(
                                   index,
                                   false,
-                                  StudentAttendanceType.gone,
+                                  AbsenceType.gone,
                                 ),
                               ),
                       ],
@@ -109,7 +109,7 @@ class _StudentsListState extends State<StudentsList> {
                                 () => _setStudentAttendance(
                                   index,
                                   true,
-                                  StudentAttendanceType.goodReason,
+                                  AbsenceType.goodReason,
                                 ),
                               )
                             : _generateButton(
@@ -117,7 +117,7 @@ class _StudentsListState extends State<StudentsList> {
                                 () => _setStudentAttendance(
                                   index,
                                   false,
-                                  StudentAttendanceType.goodReason,
+                                  AbsenceType.goodReason,
                                 ),
                               ),
                         _isStudentByApplication(index)
@@ -126,7 +126,7 @@ class _StudentsListState extends State<StudentsList> {
                                 () => _setStudentAttendance(
                                   index,
                                   true,
-                                  StudentAttendanceType.byApplication,
+                                  AbsenceType.byApplication,
                                 ),
                               )
                             : _generateButton(
@@ -134,7 +134,7 @@ class _StudentsListState extends State<StudentsList> {
                                 () => _setStudentAttendance(
                                   index,
                                   false,
-                                  StudentAttendanceType.byApplication,
+                                  AbsenceType.byApplication,
                                 ),
                               ),
                       ],
@@ -209,13 +209,10 @@ class _StudentsListState extends State<StudentsList> {
   bool _isStudentSelected(int index) =>
       widget.studentManager.isStudentSelected(index);
 
-  void _setStudentAttendance(
-    int index,
-    bool attend,
-    StudentAttendanceType type,
-  ) => setState(() {
-    widget.studentManager.setStudentAttendance(index, attend, type);
-  });
+  void _setStudentAttendance(int index, bool attend, AbsenceType type) =>
+      setState(() {
+        widget.studentManager.setStudentAttendance(index, attend, type);
+      });
 
   void _openStudentHistory(BuildContext context, int index) {}
 

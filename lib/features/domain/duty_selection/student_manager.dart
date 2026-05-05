@@ -1,10 +1,10 @@
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/student.dart';
-import 'package:duty_selector/features/data/student_attendance_type.dart';
+import 'package:duty_selector/features/data/absence_type.dart';
 
 class StudentManager {
   final Map<int, Student> students = {};
-  final Map<int, StudentAttendanceType> excludedStudents = {};
+  final Map<int, AbsenceType> excludedStudents = {};
   DatabaseService database;
 
   StudentManager(this.database, {List<Student>? students}) {
@@ -32,10 +32,10 @@ class StudentManager {
         .toSet();
   }
 
-  Map<Student, StudentAttendanceType> getExcludedStudents() {
+  Map<Student, AbsenceType> getExcludedStudents() {
     return {
       for (var entry in excludedStudents.entries.where(
-        (e) => e.value != StudentAttendanceType.selected,
+        (e) => e.value != AbsenceType.selected,
       ))
         students[entry.key]!: entry.value,
     };
@@ -44,10 +44,10 @@ class StudentManager {
   void setStudentSick(int index, bool setSick) {
     if (!isIndexValid(index)) return;
     if (setSick) {
-      excludedStudents[index] = StudentAttendanceType.sick;
+      excludedStudents[index] = AbsenceType.sick;
     } else {
       excludedStudents.removeWhere(
-        (id, type) => id == index && type == StudentAttendanceType.sick,
+        (id, type) => id == index && type == AbsenceType.sick,
       );
     }
   }
@@ -55,43 +55,39 @@ class StudentManager {
   void setStudentSelected(int index, bool setSelected) {
     if (!isIndexValid(index) || !isStudentHere(index)) return;
     if (setSelected) {
-      excludedStudents[index] = StudentAttendanceType.selected;
+      excludedStudents[index] = AbsenceType.selected;
     } else {
       excludedStudents.removeWhere(
-        (id, type) => id == index && type == StudentAttendanceType.selected,
+        (id, type) => id == index && type == AbsenceType.selected,
       );
     }
   }
 
-  void setStudentAttendance(
-    int index,
-    bool attend,
-    StudentAttendanceType type,
-  ) {
+  void setStudentAttendance(int index, bool attend, AbsenceType type) {
     if (!isIndexValid(index)) return;
     if (![
-      StudentAttendanceType.byApplication,
-      StudentAttendanceType.goodReason,
-      StudentAttendanceType.gone,
+      AbsenceType.byApplication,
+      AbsenceType.goodReason,
+      AbsenceType.gone,
     ].contains(type)) {
       return;
     }
 
     if (attend) {
       switch (type) {
-        case StudentAttendanceType.byApplication:
+        case AbsenceType.byApplication:
           excludedStudents.removeWhere(
-            (id, t) => id == index && t == StudentAttendanceType.byApplication,
+            (id, t) => id == index && t == AbsenceType.byApplication,
           );
           break;
-        case StudentAttendanceType.goodReason:
+        case AbsenceType.goodReason:
           excludedStudents.removeWhere(
-            (id, t) => id == index && t == StudentAttendanceType.goodReason,
+            (id, t) => id == index && t == AbsenceType.goodReason,
           );
           break;
-        case StudentAttendanceType.gone:
+        case AbsenceType.gone:
           excludedStudents.removeWhere(
-            (id, t) => id == index && t == StudentAttendanceType.gone,
+            (id, t) => id == index && t == AbsenceType.gone,
           );
           break;
         default:
@@ -99,14 +95,14 @@ class StudentManager {
       }
     } else {
       switch (type) {
-        case StudentAttendanceType.byApplication:
-          excludedStudents[index] = StudentAttendanceType.byApplication;
+        case AbsenceType.byApplication:
+          excludedStudents[index] = AbsenceType.byApplication;
           break;
-        case StudentAttendanceType.goodReason:
-          excludedStudents[index] = StudentAttendanceType.goodReason;
+        case AbsenceType.goodReason:
+          excludedStudents[index] = AbsenceType.goodReason;
           break;
-        case StudentAttendanceType.gone:
-          excludedStudents[index] = StudentAttendanceType.gone;
+        case AbsenceType.gone:
+          excludedStudents[index] = AbsenceType.gone;
           break;
         default:
           break;
@@ -119,21 +115,21 @@ class StudentManager {
   bool isStudentWithoutReason(int index) {
     if (!isIndexValid(index)) return false;
     return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == StudentAttendanceType.gone,
+      (e) => e.key == index && e.value == AbsenceType.gone,
     );
   }
 
   bool isStudentWithGoodReason(int index) {
     if (!isIndexValid(index)) return false;
     return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == StudentAttendanceType.goodReason,
+      (e) => e.key == index && e.value == AbsenceType.goodReason,
     );
   }
 
   bool isStudentByApplication(int index) {
     if (!isIndexValid(index)) return false;
     return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == StudentAttendanceType.byApplication,
+      (e) => e.key == index && e.value == AbsenceType.byApplication,
     );
   }
 
@@ -151,14 +147,14 @@ class StudentManager {
   bool isStudentSick(int index) {
     if (!isIndexValid(index)) return false;
     return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == StudentAttendanceType.sick,
+      (e) => e.key == index && e.value == AbsenceType.sick,
     );
   }
 
   bool isStudentSelected(int index) {
     if (!isIndexValid(index)) return false;
     return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == StudentAttendanceType.selected,
+      (e) => e.key == index && e.value == AbsenceType.selected,
     );
   }
 
@@ -190,7 +186,7 @@ class StudentManager {
   bool isStudentHere(int index) =>
       !excludedStudents.containsKey(index) ||
       !excludedStudents.entries.any(
-        (e) => e.key == index && e.value != StudentAttendanceType.selected,
+        (e) => e.key == index && e.value != AbsenceType.selected,
       );
 
   bool isIndexValid(int index) =>
