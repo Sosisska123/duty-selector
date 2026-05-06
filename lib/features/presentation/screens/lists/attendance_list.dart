@@ -1,4 +1,10 @@
 import 'package:duty_selector/design.dart';
+import 'package:duty_selector/features/data/database.dart';
+import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
+import 'package:duty_selector/features/presentation/screens/modal/add_absence_modal.dart';
+import 'package:duty_selector/features/presentation/widgets/display/students_list.dart';
+import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
+
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -7,7 +13,8 @@ import 'package:logger/logger.dart';
 var logger = Logger();
 
 class AttendanceList extends StatelessWidget {
-  const AttendanceList({super.key});
+  final DatabaseService databaseService;
+  const AttendanceList({super.key, required this.databaseService});
 
   @override
   Widget build(BuildContext context) {
@@ -15,18 +22,70 @@ class AttendanceList extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         centerTitle: true,
-        title: TitleText(text: 'История посещений'),
+        title: TitleText(text: 'Отсутствуют сейчас'),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.secondary,
-        onPressed: onPressed,
-        child: Icon(Ionicons.add, color: AppColors.text),
+        onPressed: () => _editAbsence(context),
+        child: Icon(Ionicons.pencil, color: AppColors.text),
       ),
-      body: Placeholder(),
+      body: FutureBuilder(
+        future: _getStudentsList(),
+        builder: (c, s) {
+          if (!s.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (s.hasError) {
+            logger.e(
+              'Error while building Students List',
+              error: s.error,
+              stackTrace: s.stackTrace,
+            );
+            return const AccentText(text: 'Ошибка');
+          }
+
+          return s.data!;
+        },
+      ),
     );
   }
 
-  void onPressed() {
-    logger.i('Pressed');
+  Future<StudentsList> _getStudentsList() async {
+    final manager = StudentManager(databaseService);
+    manager.initStudentsMap(await databaseService.getStudents());
+    manager.addSickStudentsFromDB();
+
+    manager.setStudentSick(0, true);
+    manager.setStudentSick(2, true);
+    manager.setStudentSick(3, true);
+    manager.setStudentSick(4, true);
+
+    return StudentsList(studentManager: manager, onlyMissing: true);
+  }
+
+  void _editAbsence(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          snap: true,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return AddAbsenceModal(
+              scrollController: scrollController,
+              databaseService: databaseService,
+            );
+          },
+        );
+      },
+    );
   }
 }

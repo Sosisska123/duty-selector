@@ -1,11 +1,13 @@
 import 'package:duty_selector/features/data/absence_type.dart';
 import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
+import 'package:duty_selector/features/presentation/screens/student_history.dart';
 import 'package:duty_selector/features/presentation/widgets/statuses/bordered_square.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 var logger = Logger();
 
@@ -15,6 +17,7 @@ class StudentsList extends StatefulWidget {
   final bool useInitials;
   final bool useExpansionTile;
   final bool onlyHistory;
+  final bool onlyMissing;
 
   const StudentsList({
     super.key,
@@ -23,6 +26,7 @@ class StudentsList extends StatefulWidget {
     this.useInitials = true,
     this.useExpansionTile = true,
     this.onlyHistory = false,
+    this.onlyMissing = false,
   });
 
   @override
@@ -39,6 +43,10 @@ class _StudentsListState extends State<StudentsList> {
   }
 
   Widget _buildList(BuildContext context, int index) {
+    if (widget.onlyMissing && _isStudentHere(index)) {
+      return SizedBox();
+    }
+
     return widget.useExpansionTile
         ? _makeStudentExpansionTile(index)
         : _makeStudentRow(index);
@@ -214,7 +222,16 @@ class _StudentsListState extends State<StudentsList> {
         widget.studentManager.setStudentAttendance(index, attend, type);
       });
 
-  void _openStudentHistory(BuildContext context, int index) {}
+  void _openStudentHistory(BuildContext context, int index) {
+    final student = _getStudent(index);
+    PersistentNavBarNavigator.pushNewScreen(
+      context,
+      screen: StudentHistory(
+        student: student!,
+        databaseService: widget.studentManager.database,
+      ),
+    );
+  }
 
   bool _isStudentHere(int index) => widget.studentManager.isStudentHere(index);
 

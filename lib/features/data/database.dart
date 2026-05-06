@@ -1,3 +1,4 @@
+import 'package:duty_selector/features/data/models/absence.dart';
 import 'package:duty_selector/features/data/models/duty.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:logger/logger.dart';
@@ -44,7 +45,10 @@ class DatabaseService {
     await db.execute(
       'CREATE TABLE IF NOT EXISTS duties(id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER REFERENCES students(id), duty_type TEXT NOT NULL, date TEXT NOT NULL)',
     );
-    logger.i('Database created');
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS absences(id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER REFERENCES students(id), date TEXT NOT NULL, expire_time INTEGER NOT NULL, reason TEXT NOT NULL, lesson_name TEXT)',
+    );
+    logger.i('4 Databases created');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -142,6 +146,46 @@ class DatabaseService {
     }
     return lastRowsId;
   }
+
+  // absences
+  Future<bool> addAbsence(Absence absence) async {
+    final db = await database;
+
+    await db.insert(
+      'absences',
+      absence.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    logger.i('Inserted ${absence.toString()}');
+
+    return true;
+  }
+
+  Future<List<Absence>> getWeekAbsencesFor(int? id) async {
+    final db = await database;
+
+    final result = await db.query(
+      'absences',
+      where: 'student_id = ?',
+      whereArgs: [id],
+      orderBy: 'date DESC',
+      limit: 7,
+    );
+
+    logger.i('Get week absences for $id');
+    return result.map((e) => Absence.fromMap(e)).toList();
+  }
+
+  Future<List<Absence>> getAbsences() async {
+    final db = await database;
+
+    final results = await db.query('absences', orderBy: 'id');
+
+    return results.map((row) => Absence.fromMap(row)).toList();
+  }
+
+  // endregion
 
   Future<int> clear(String tableName) async {
     final db = await database;

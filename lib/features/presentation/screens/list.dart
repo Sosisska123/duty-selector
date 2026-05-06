@@ -36,12 +36,12 @@ class ListScreen extends StatelessWidget {
           ListCard(
             tapCallback: () => _openList(context, 'duty'),
             icon: Icon(Ionicons.people_circle, color: AppColors.accent),
-            text: 'История дежурств',
+            text: 'Дежурства',
           ),
           ListCard(
             tapCallback: () => _openList(context, 'attendance'),
             icon: Icon(Ionicons.people_circle, color: AppColors.accent),
-            text: 'История посещений',
+            text: 'Посещаемость',
           ),
         ],
       ),
@@ -55,7 +55,7 @@ class ListScreen extends StatelessWidget {
       case 'attendance':
         PersistentNavBarNavigator.pushNewScreen(
           context,
-          screen: AttendanceList(),
+          screen: AttendanceList(databaseService: databaseService),
         );
         break;
       case 'duty':
