@@ -51,7 +51,7 @@ class GroupList extends StatelessWidget {
   Future<StudentsList> _getStudentsList() async {
     final manager = StudentManager(databaseService);
     manager.initStudentsMap(await databaseService.getStudents());
-    manager.addSickStudentsFromDB();
+    manager.getAbsentStudentsFromDB();
 
     return StudentsList(studentManager: manager, onlyHistory: true);
   }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:duty_selector/features/data/absence_type.dart';
@@ -28,6 +30,21 @@ class StudentManager {
     for (var e in excludedStudents.entries) {
       result[getStudent(e.key)!] = e.value;
     }
+    return result;
+  }
+
+  // FIXME: ref
+  Map<Student, AbsenceType> getPresentStudents() {
+    final result = <Student, AbsenceType>{};
+
+    final inluded = students.entries
+        .where((e) => !excludedStudents.containsKey(e.key))
+        .map((e) => e.value);
+
+    for (var student in inluded) {
+      result[student] = AbsenceType.selected;
+    }
+
     return result;
   }
 
@@ -152,9 +169,12 @@ class StudentManager {
     return database.getStudents();
   }
 
-  Future<dynamic> addSickStudentsFromDB() async {
-    // TODO: var sickStudents = database.getSickStudents();
-    // addAll(sickStudents ids: StudentAttendanceType.sick)
+  Future<dynamic> getAbsentStudentsFromDB() async {
+    final missing = await database.getAbsenceNowStudents();
+    for (var e in missing) {
+      final type = AbsenceType.fromString(e.values.first.reason);
+      excludedStudents[e.keys.first.id!] = type;
+    }
   }
 
   void setAllSelected(bool value) {

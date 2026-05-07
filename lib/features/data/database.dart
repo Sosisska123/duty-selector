@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:duty_selector/features/data/models/absence.dart';
 import 'package:duty_selector/features/data/models/duty.dart';
 import 'package:duty_selector/features/data/models/student.dart';
@@ -48,6 +50,7 @@ class DatabaseService {
     await db.execute(
       'CREATE TABLE IF NOT EXISTS absences(id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER REFERENCES students(id), date TEXT NOT NULL, expire_time INTEGER NOT NULL, reason TEXT NOT NULL, lesson_name TEXT)',
     );
+    // TODO: Add views, idexes
     logger.i('3 Databases created');
   }
 
@@ -100,7 +103,7 @@ class DatabaseService {
     final db = await database;
 
     var result = await db.rawQuery(
-      'SELECT s.id, s.first_name, s.surname, s.last_name FROM students s JOIN duties d ON s.id = d.student_id WHERE d.date = (SELECT MAX(date) FROM duties)',
+      'SELECT s.id, s.first_name, s.surname, s.last_name FROM students s JOIN duties d ON s.id = d.student_id AND date(d.date) = (SELECT MAX(date(date)) FROM duties)',
     );
 
     if (result.isEmpty) {
@@ -175,7 +178,7 @@ class DatabaseService {
       'WHERE a.student_id = s.id '
       "AND datetime(a.date, '' || a.expire_time || ' minutes') > datetime('now', 'localtime')"
       ') '
-      'ORDER by d.date asc '
+      'ORDER by d.date asc, s.id asc '
       'LIMIT ?',
       [...students.map((e) => e.id), limit],
     );
@@ -213,6 +216,52 @@ class DatabaseService {
 
     logger.i('Get week absences for $id');
     return result.map((e) => Absence.fromMap(e)).toList();
+  }
+
+  Future<List<Map<Student, Absence>>> getAbsenceNowStudents() async {
+    final db = await database;
+
+    final queryRes = await db.rawQuery(
+      'SELECT '
+      's.id AS sid, '
+      's.first_name, '
+      's.surname, '
+      's.last_name, '
+      'a.id AS aid, '
+      'a.student_id, '
+      'a.date, '
+      'a.reason, '
+      'a.lesson_name, '
+      'a.expire_time '
+      'FROM students s '
+      'INNER JOIN absences a '
+      'ON a.student_id = s.id '
+      "AND datetime(a.date, '' || a.expire_time || ' minutes') > datetime('now', 'localtime')",
+    );
+
+    List<Map<Student, Absence>> result = [];
+    for (var e in queryRes) {
+      final stud = Student(
+        id: e['sid'] as int,
+        firstName: e['first_name'] as String,
+        surname: e['surname'] as String,
+        lastName: e['last_name'] as String,
+      );
+
+      final abs = Absence(
+        id: e['aid'] as int,
+        reason: e['reason'] as String,
+        date: DateTime.parse(e['date'] as String),
+        studentId: e['student_id'] as int,
+        expireDuration: e['expire_time'] as int,
+        lessonName: e['lesson_name'] as String,
+      );
+
+      result.add({stud: abs});
+    }
+    logger.i('Absence now: $result');
+
+    return result;
   }
 
   Future<List<Absence>> getAbsences() async {

@@ -51,6 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void showSnack(List<Student> e) {
+    // FIXME: The following assertion was thrown during a scheduler callback:
+    // There are multiple heroes that share the same tag within a subtree.
+    // Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), each Hero must
+    // have a unique non-null tag.
+    // In this case, multiple heroes had the following tag: <SnackBar Hero tag - Text("Выбрано ")>
+    // ├# Here is the subtree for one of the offending heroes: Hero
     final snackBar = SnackBar(
       content: Text('Выбрано ${e.map((e) => e.initials).join(', ')}'),
     );

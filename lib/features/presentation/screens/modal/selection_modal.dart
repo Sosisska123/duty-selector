@@ -22,10 +22,12 @@ class SelectionModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String dutyType = _entries()[0].label;
+
     return Container(
       alignment: AlignmentGeometry.topCenter,
       padding: EdgeInsetsGeometry.all(AppSpacing.medium),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.secondary,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.medium),
@@ -38,29 +40,22 @@ class SelectionModal extends StatelessWidget {
               controller: scrollController,
               shrinkWrap: true,
               children: [
-                Center(child: TitleText(text: 'Настройка выборки')),
-                SizedBox(height: AppSpacing.large),
+                const Center(child: TitleText(text: 'Настройка выборки')),
+                const SizedBox(height: AppSpacing.large),
                 DropdownMenu(
                   label: Text('Тип дежурства', style: AppTextStyles.regular),
                   initialSelection: 1,
                   enableFilter: true,
                   textStyle: AppTextStyles.regular,
                   width: MediaQuery.of(context).size.width,
-                  dropdownMenuEntries: _entries().toList(),
+                  dropdownMenuEntries: _entries(),
+                  onSelected: (value) {
+                    _entries()[value!];
+                  },
                 ),
-                SizedBox(height: AppSpacing.medium),
-                // Text('Кол-во человек', style: AppTextStyles.bigRegular),
-                // TextField(
-                //   keyboardType: TextInputType.number,
-                //   decoration: InputDecoration(
-                //     hintText: 'Кол-во человек',
-                //     hintStyle: AppTextStyles.smallAccent,
-                //   ),
-                //   style: AppTextStyles.regular,
-                // ),
-                // SizedBox(height: AppSpacing.medium),
-                Text('Примечание', style: AppTextStyles.bigRegular),
-                TextField(
+                const SizedBox(height: AppSpacing.medium),
+                const Text('Примечание', style: AppTextStyles.bigRegular),
+                const TextField(
                   autocorrect: true,
                   decoration: InputDecoration(
                     hintText: 'Примечание',
@@ -68,9 +63,9 @@ class SelectionModal extends StatelessWidget {
                   ),
                   style: AppTextStyles.regular,
                 ),
-                SizedBox(height: AppSpacing.medium),
+                const SizedBox(height: AppSpacing.medium),
                 ElevatedButton(
-                  onPressed: () => _selectStudents(context),
+                  onPressed: () => _selectStudents(context, dutyType),
                   child: Text('Выбрать'),
                 ),
               ],
@@ -92,13 +87,14 @@ class SelectionModal extends StatelessWidget {
     return entries;
   }
 
-  void _selectStudents(BuildContext context) {
+  void _selectStudents(BuildContext context, String dutyType) {
     PersistentNavBarNavigator.pop(context);
     PersistentNavBarNavigator.pushNewScreen(
       context,
       screen: StudentsPage(
         databaseService: databaseService,
         selectionType: selectionType,
+        dutyType: dutyType,
       ),
       withNavBar: false,
     );

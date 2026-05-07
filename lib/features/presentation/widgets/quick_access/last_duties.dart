@@ -43,13 +43,6 @@ class _LastDutiesState extends State<LastDuties> {
 
   @override
   Widget build(BuildContext context) {
-    return generateWidget();
-  }
-
-  Column generateWidget({
-    String? lastDutyDate,
-    List<Student>? lastDutyStudents,
-  }) {
     return Column(
       spacing: AppSpacing.medium,
       children: [
@@ -57,18 +50,11 @@ class _LastDutiesState extends State<LastDuties> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TitleText(text: "Предыдущие\nдежурные"),
-            lastDutyDate == null
-                ? getLastDutyDateText()
-                : getLastDutyDateTextSync(lastDutyDate),
+            const TitleText(text: "Предыдущие\nдежурные"),
+            getLastDutyDateText(),
           ],
         ),
-        SizedBox(
-          height: 40,
-          child: lastDutyStudents == null
-              ? getLastDutyStudents()
-              : getLastDutyStudentsSync(lastDutyStudents),
-        ),
+        SizedBox(height: 40, child: getLastDutyStudents()),
       ],
     );
   }

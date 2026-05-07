@@ -79,7 +79,7 @@ class SelectDuty extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.7,
+          initialChildSize: 0.5,
           minChildSize: 0.4,
           maxChildSize: 0.9,
           expand: false,

@@ -23,25 +23,26 @@ class ListScreen extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         centerTitle: true,
-        title: TitleText(text: 'Записи'),
+        title: const TitleText(text: 'Записи'),
       ),
       body: Column(
         spacing: AppSpacing.small,
         children: [
           ListCard(
             tapCallback: () => _openList(context, 'group'),
-            icon: Icon(Ionicons.people_circle, color: AppColors.accent),
+            icon: const Icon(Ionicons.people_circle, color: AppColors.accent),
             text: 'Список группы',
           ),
           ListCard(
             tapCallback: () => _openList(context, 'duty'),
-            icon: Icon(Ionicons.people_circle, color: AppColors.accent),
+            icon: const Icon(Ionicons.people_circle, color: AppColors.accent),
             text: 'Дежурства',
           ),
           ListCard(
-            tapCallback: () => _openList(context, 'attendance'),
-            icon: Icon(Ionicons.people_circle, color: AppColors.accent),
-            text: 'Посещаемость',
+            // tapCallback: () => _openList(context, 'attendance'),
+            tapCallback: () => {},
+            icon: const Icon(Ionicons.people_circle, color: AppColors.accent),
+            text: 'Посещаемость (пока недоступно)',
           ),
         ],
       ),
