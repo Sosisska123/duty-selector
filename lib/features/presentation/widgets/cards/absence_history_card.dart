@@ -41,27 +41,43 @@ class AbsenceHistoryCard extends StatelessWidget {
     final col = Column(
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: .spaceBetween,
           children: [
-            RegularText(text: absence.lessonName),
-            AccentText(text: DateFormat('dd.MM.yy').format(absence.date)),
+            Column(
+              mainAxisAlignment: .start,
+              crossAxisAlignment: .start,
+              children: [
+                RegularText(text: absence.lessonName ?? 'Не указано'),
+                Row(
+                  spacing: AppSpacing.small,
+                  children: [
+                    RegularText(text: 'Причина:'),
+                    RegularText(text: absence.reason),
+                  ],
+                ),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: .end,
+              children: [
+                AccentText(text: DateFormat('dd.MM.yy').format(absence.date)),
+                AccentText(text: DateFormat('HH:mm').format(absence.date)),
+              ],
+            ),
           ],
         ),
+
         Row(
           spacing: AppSpacing.small,
           children: [
-            RegularText(text: 'Причина:'),
-            RegularText(text: absence.reason),
-          ],
-        ),
-        Row(
-          spacing: AppSpacing.small,
-          children: [
-            AccentText(text: 'Длителность пары:'),
+            AccentText(text: 'Длителность:'),
             AccentText(text: absence.expireDuration.toString()),
             AccentText(text: 'мин.'),
           ],
         ),
+
+        SizedBox(height: AppSpacing.xsmall),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

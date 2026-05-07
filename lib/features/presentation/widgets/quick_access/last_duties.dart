@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:duty_selector/features/data/duties_eventbus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -20,8 +23,33 @@ class LastDuties extends StatefulWidget {
 }
 
 class _LastDutiesState extends State<LastDuties> {
+  late StreamSubscription sub;
+
+  @override
+  void initState() {
+    super.initState();
+    sub = DutiesEventBus.stream.listen((e) {
+      if (e.isNotEmpty) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    sub.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    return generateWidget();
+  }
+
+  Column generateWidget({
+    String? lastDutyDate,
+    List<Student>? lastDutyStudents,
+  }) {
     return Column(
       spacing: AppSpacing.medium,
       children: [
@@ -30,12 +58,44 @@ class _LastDutiesState extends State<LastDuties> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TitleText(text: "Предыдущие\nдежурные"),
-            getLastDutyDateText(),
+            lastDutyDate == null
+                ? getLastDutyDateText()
+                : getLastDutyDateTextSync(lastDutyDate),
           ],
         ),
-        SizedBox(height: 40, child: getLastDutyStudents()),
+        SizedBox(
+          height: 40,
+          child: lastDutyStudents == null
+              ? getLastDutyStudents()
+              : getLastDutyStudentsSync(lastDutyStudents),
+        ),
       ],
     );
+  }
+
+  AccentText getLastDutyDateTextSync(String lastDutyDate) {
+    return lastDutyDate.isEmpty
+        ? AccentText(text: 'Пусто')
+        : AccentText(
+            text: DateFormat('dd.MM.yy').format(DateTime.parse(lastDutyDate)),
+          );
+  }
+
+  Widget getLastDutyStudentsSync(List<Student> lastDutyStudents) {
+    return lastDutyStudents.isEmpty
+        ? const AccentText(text: 'Пусто')
+        : ListView.separated(
+            separatorBuilder: (context, index) =>
+                const SizedBox(width: AppSpacing.medium),
+            scrollDirection: Axis.horizontal,
+            itemCount: lastDutyStudents.length,
+            itemBuilder: (_, idx) {
+              return RoundedBackgroundText(
+                text: lastDutyStudents[idx].initials,
+                backgroundColor: AppColors.secondary,
+              );
+            },
+          );
   }
 
   FutureBuilder<String?> getLastDutyDateText() {
@@ -55,13 +115,7 @@ class _LastDutiesState extends State<LastDuties> {
           return const AccentText(text: 'Ошибка');
         }
 
-        return snapshot.data!.isEmpty
-            ? AccentText(text: 'Пусто')
-            : AccentText(
-                text: DateFormat(
-                  'dd.MM.yy',
-                ).format(DateTime.parse(snapshot.data!)),
-              );
+        return getLastDutyDateTextSync(snapshot.data!);
       },
     );
   }
@@ -83,20 +137,7 @@ class _LastDutiesState extends State<LastDuties> {
           return const AccentText(text: 'Ошибка');
         }
 
-        return s.data!.isEmpty
-            ? const AccentText(text: 'Пусто')
-            : ListView.separated(
-                separatorBuilder: (context, index) =>
-                    const SizedBox(width: AppSpacing.medium),
-                scrollDirection: Axis.horizontal,
-                itemCount: s.data!.length,
-                itemBuilder: (_, idx) {
-                  return RoundedBackgroundText(
-                    text: s.data![idx].initials,
-                    backgroundColor: AppColors.secondary,
-                  );
-                },
-              );
+        return getLastDutyStudentsSync(s.data!);
       },
     );
   }

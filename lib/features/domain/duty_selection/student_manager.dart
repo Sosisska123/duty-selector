@@ -23,22 +23,12 @@ class StudentManager {
     }
   }
 
-  Set<Student> getTargetStudents(int? limit, {bool includeUnselected = true}) {
-    return students.entries
-        .where((e) => isStudentHere(e.key))
-        .where((e) => includeUnselected || isStudentSelected(e.key))
-        .map((e) => e.value)
-        .take(limit ?? studentsMapLen)
-        .toSet();
-  }
-
-  Map<Student, AbsenceType> getExcludedStudents() {
-    return {
-      for (var entry in excludedStudents.entries.where(
-        (e) => e.value != AbsenceType.selected,
-      ))
-        students[entry.key]!: entry.value,
-    };
+  Map<Student, AbsenceType> getCandidates() {
+    final result = <Student, AbsenceType>{};
+    for (var e in excludedStudents.entries) {
+      result[getStudent(e.key)!] = e.value;
+    }
+    return result;
   }
 
   void setStudentSick(int index, bool setSick) {

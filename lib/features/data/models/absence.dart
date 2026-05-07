@@ -2,15 +2,15 @@ class Absence {
   final int? id;
   final String reason;
   final DateTime date;
-  final String lessonName;
+  final String? lessonName;
   final int studentId;
   final int expireDuration;
 
   const Absence({
     this.id,
+    this.lessonName,
     required this.reason,
     required this.date,
-    required this.lessonName,
     required this.studentId,
     required this.expireDuration,
   });
@@ -32,7 +32,9 @@ class Absence {
       expireDuration: map['expire_time'] as int,
       reason: map['reason'] as String,
       date: DateTime.parse(map['date'] as String),
-      lessonName: map['lesson_name'] as String,
+      lessonName: map['lesson_name'] != null
+          ? map['lesson_name'] as String
+          : null,
       studentId: map['student_id'] as int,
     );
   }

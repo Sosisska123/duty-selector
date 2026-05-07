@@ -48,7 +48,7 @@ class DatabaseService {
     await db.execute(
       'CREATE TABLE IF NOT EXISTS absences(id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER REFERENCES students(id), date TEXT NOT NULL, expire_time INTEGER NOT NULL, reason TEXT NOT NULL, lesson_name TEXT)',
     );
-    logger.i('4 Databases created');
+    logger.i('3 Databases created');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -145,6 +145,44 @@ class DatabaseService {
       );
     }
     return lastRowsId;
+  }
+
+  Future<List<Student>> getNewDutiesWithin(
+    Set<Student> students, {
+    int limit = 100,
+  }) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      'SELECT '
+      's.id, '
+      's.first_name, '
+      's.surname, '
+      's.last_name '
+      'FROM students s '
+      'LEFT JOIN duties d '
+      'ON s.id = d.student_id '
+      'AND d.date = ('
+      'SELECT MAX(date) '
+      'FROM duties d2 '
+      'WHERE s.id = d2.student_id'
+      ') '
+      'WHERE s.id IN '
+      '(${students.map((e) => '?').join(', ')}) '
+      'AND NOT EXISTS ('
+      'SELECT 1 '
+      'FROM absences a '
+      'WHERE a.student_id = s.id '
+      "AND datetime(a.date, '' || a.expire_time || ' minutes') > datetime('now', 'localtime')"
+      ') '
+      'ORDER by d.date asc '
+      'LIMIT ?',
+      [...students.map((e) => e.id), limit],
+    );
+
+    logger.i('getNewDutiesWithin: $result students');
+
+    return result.map((e) => Student.fromMap(e)).toList();
   }
 
   // absences

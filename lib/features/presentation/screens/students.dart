@@ -1,4 +1,7 @@
+import 'package:duty_selector/features/data/absence_type.dart';
+import 'package:duty_selector/features/data/duties_eventbus.dart';
 import 'package:duty_selector/features/data/duty_selection_type.dart';
+import 'package:duty_selector/features/data/models/absence.dart';
 import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
 import 'package:duty_selector/features/presentation/widgets/display/students_list.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
@@ -112,23 +115,50 @@ class _StudentsPageState extends State<StudentsPage> {
   void _performSelection(
     StudentManager manager,
     DutySelectionType selectionType,
-  ) {
-    int? sLimit;
+  ) async {
+    final candidates = manager.getCandidates();
+    int sLimit = candidates.length;
+
+    logger.i('Selected candidates: $candidates for $selectionType');
+
     if (selectionType == DutySelectionType.next2) sLimit = 2;
     if (selectionType == DutySelectionType.next4) sLimit = 4;
 
-    var targetStudents = manager.getTargetStudents(sLimit);
-    var excludedStudents = manager.getExcludedStudents();
+    final missing = candidates.entries.where(
+      (e) => e.value != AbsenceType.selected,
+    );
 
-    logger.i('Selected students: $targetStudents for $selectionType');
-    logger.i('Excluded students: $excludedStudents');
+    logger.i('Missing: $missing');
 
-    final snackBar = SnackBar(
-      content: Text(
-        'Выбрано ${targetStudents.map((e) => e.initials).join(', ')}',
+    Future.wait(
+      missing.map(
+        (e) => widget.databaseService.addAbsence(
+          Absence(
+            studentId: e.key.id!,
+            reason: e.value.name,
+            date: DateTime.now(),
+            expireDuration: 80,
+          ),
+        ),
       ),
     );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    PersistentNavBarNavigator.pop(context);
+
+    final selected = candidates.entries
+        .where((e) => e.value == AbsenceType.selected)
+        .map((e) => e.key)
+        .toSet();
+
+    logger.i('Selected: $selected');
+
+    final duties = await widget.databaseService.getNewDutiesWithin(
+      selected,
+      limit: sLimit,
+    );
+
+    DutiesEventBus.send(duties);
+
+    if (context.mounted) {
+      PersistentNavBarNavigator.pop(context);
+    }
   }
 }
