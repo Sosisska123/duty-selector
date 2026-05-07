@@ -53,7 +53,7 @@ class AttendanceList extends StatelessWidget {
   Future<StudentsList> _getStudentsList() async {
     final manager = StudentManager(databaseService);
     manager.initStudentsMap(await databaseService.getStudents());
-    manager.getAbsentStudentsFromDB();
+    manager.initAbsentStudentsFromDB();
 
     return StudentsList(studentManager: manager, onlyMissing: true);
   }

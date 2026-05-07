@@ -184,9 +184,6 @@ class _StudentsListState extends State<StudentsList> {
     if (_isStudentSick(index)) {
       children.add(const BorderedSquare(text: 'Б', color: Colors.green));
     }
-    if (_isStudentImmune(index)) {
-      children.add(const BorderedSquare(text: 'И', color: Colors.blue));
-    }
     if (_isStudentWithoutReason(index)) {
       children.add(const BorderedSquare(text: 'У', color: Colors.red));
     }
@@ -201,9 +198,6 @@ class _StudentsListState extends State<StudentsList> {
   }
 
   Student? _getStudent(int index) => widget.studentManager.getStudent(index);
-
-  bool _isStudentImmune(int index) =>
-      widget.studentManager.isStudentImmune(index);
 
   void _setStudentSick(int index, bool isSick) => setState(() {
     widget.studentManager.setStudentSick(index, isSick);

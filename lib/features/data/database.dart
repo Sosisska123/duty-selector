@@ -254,7 +254,7 @@ class DatabaseService {
         date: DateTime.parse(e['date'] as String),
         studentId: e['student_id'] as int,
         expireDuration: e['expire_time'] as int,
-        lessonName: e['lesson_name'] as String,
+        lessonName: e['lesson_name'] as String? ?? 'Не указано',
       );
 
       result.add({stud: abs});
