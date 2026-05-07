@@ -28,7 +28,9 @@ class StudentManager {
   Map<Student, AbsenceType> getCandidates() {
     final result = <Student, AbsenceType>{};
     for (var e in excludedStudents.entries) {
-      result[getStudent(e.key)!] = e.value;
+      final student = getStudent(e.key);
+      if (student == null) continue;
+      result[student] = e.value;
     }
     return result;
   }
@@ -169,7 +171,7 @@ class StudentManager {
     return database.getStudents();
   }
 
-  Future<dynamic> getAbsentStudentsFromDB() async {
+  Future<void> initAbsentStudentsFromDB() async {
     final missing = await database.getAbsenceNowStudents();
     for (var e in missing) {
       final type = AbsenceType.fromString(e.values.first.reason);
@@ -200,5 +202,5 @@ class StudentManager {
       );
 
   bool isIndexValid(int index) =>
-      (students.isEmpty || index > studentsMapLen) ? false : true;
+      (students.isEmpty || index >= studentsMapLen) ? false : true;
 }
