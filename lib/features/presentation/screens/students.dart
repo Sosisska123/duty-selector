@@ -162,14 +162,16 @@ class _StudentsPageState extends State<StudentsPage> {
   ) async {
     Future.wait(
       absentStudents.map(
-        (e) => widget.databaseService.addAbsence(
-          Absence(
-            studentId: e.keys.first.id!,
-            reason: e.values.first.name,
-            date: DateTime.now(),
-            expireDuration: 80,
-          ),
-        ),
+        (e) => e.values.first == AbsenceType.present
+            ? widget.databaseService.removeLastAbsence(e.keys.first.id!)
+            : widget.databaseService.addAbsence(
+                Absence(
+                  studentId: e.keys.first.id!,
+                  reason: e.values.first.name,
+                  date: DateTime.now(),
+                  expireDuration: 80,
+                ),
+              ),
       ),
     );
   }

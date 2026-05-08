@@ -269,6 +269,19 @@ class DatabaseService {
     return results.map((row) => Absence.fromMap(row)).toList();
   }
 
+  Future removeLastAbsence(int studentId) async {
+    final db = await database;
+
+    await db.delete(
+      'absences',
+      where:
+          'id = (SELECT id FROM absences WHERE student_id = ? ORDER BY id DESC LIMIT 1)',
+      whereArgs: [studentId],
+    );
+
+    logger.i('Remove last absence from: $studentId');
+  }
+
   // endregion
 
   Future<int> clear(String tableName) async {

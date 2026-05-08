@@ -58,7 +58,7 @@ class StudentManager {
     for (var i = 0; i < studentRows.length; i++) {
       final student = studentRows[i];
 
-      if (student!.isSelected == true) {
+      if (student!.isSelected == true && isStudentPresent(i)) {
         result.add(student.student);
       }
     }
@@ -74,7 +74,7 @@ class StudentManager {
     for (var i = 0; i < studentRows.length; i++) {
       final student = studentRows[i];
 
-      if (!(student!.isStudentPresent()) && student.hasAbsenceChanged) {
+      if (student!.hasAbsenceChanged) {
         result.add({student.student: student.absenceType});
       }
     }
