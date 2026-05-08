@@ -102,9 +102,10 @@ class _StudentsPageState extends State<StudentsPage> {
     StudentManager manager,
     DutySelectionType type,
   ) async {
-    final r = await widget.databaseService.getStudents();
-    manager.initStudentsMap(r);
-    await manager.initAbsentStudentsFromDB();
+    final students = await widget.databaseService.getAbsenceNowStudents(
+      includeAll: true,
+    );
+    manager.initStudentsMap(studentsAbsences: students);
 
     if (type == DutySelectionType.byHand || type == DutySelectionType.random) {
       return StudentsList(studentManager: manager, useCheckbox: true);
@@ -117,57 +118,63 @@ class _StudentsPageState extends State<StudentsPage> {
     StudentManager manager,
     DutySelectionType selectionType,
   ) async {
-    Map<Student, AbsenceType> candidates;
+    final manualSelection =
+        selectionType == DutySelectionType.byHand ||
+        selectionType == DutySelectionType.random;
 
-    // those with checkbosex
-    if (selectionType == DutySelectionType.byHand ||
-        selectionType == DutySelectionType.random) {
-      candidates = manager.getCandidates();
-    } else {
-      candidates = manager.getPresentStudents();
+    final candidates = manager.getCandidates(allPresent: !manualSelection);
+    final absentStudents = manager.getChangedAbsentStudents();
+
+    await saveAbsentStudents(absentStudents);
+
+    if (candidates.isEmpty) {
+      logger.i('Candidates are empty');
+      if (context.mounted) {
+        PersistentNavBarNavigator.pop(context);
+      }
+      return;
     }
 
-    int sLimit = candidates.length;
-
-    logger.i('Selected candidates: $candidates for $selectionType');
+    int selectionLimit = candidates.length;
 
     if (selectionType == DutySelectionType.next2) {
-      sLimit = 2;
+      selectionLimit = 2;
     } else if (selectionType == DutySelectionType.next4) {
-      sLimit = 4;
+      selectionLimit = 4;
     }
 
-    final missing = candidates.entries.where(
-      (e) => e.value != AbsenceType.selected,
+    final duties = await widget.databaseService.getNewDutiesWithin(
+      candidates,
+      limit: selectionLimit,
     );
 
-    logger.i('Missing: $missing');
+    await saveDutiesForStudents(duties);
 
+    DutiesEventBus.send(duties.toList());
+
+    if (context.mounted) {
+      PersistentNavBarNavigator.pop(context);
+    }
+  }
+
+  Future saveAbsentStudents(
+    List<Map<Student, AbsenceType>> absentStudents,
+  ) async {
     Future.wait(
-      missing.map(
+      absentStudents.map(
         (e) => widget.databaseService.addAbsence(
           Absence(
-            studentId: e.key.id!,
-            reason: e.value.name,
+            studentId: e.keys.first.id!,
+            reason: e.values.first.name,
             date: DateTime.now(),
             expireDuration: 80,
           ),
         ),
       ),
     );
+  }
 
-    final selected = candidates.entries
-        .where((e) => e.value == AbsenceType.selected)
-        .map((e) => e.key)
-        .toSet();
-
-    logger.i('Selected: $selected');
-
-    final duties = await widget.databaseService.getNewDutiesWithin(
-      selected,
-      limit: sLimit,
-    );
-
+  Future saveDutiesForStudents(Set<Student> duties) async {
     Future.wait(
       duties.map(
         (e) => widget.databaseService.addDuty(
@@ -181,11 +188,5 @@ class _StudentsPageState extends State<StudentsPage> {
         ),
       ),
     );
-
-    DutiesEventBus.send(duties);
-
-    if (context.mounted) {
-      PersistentNavBarNavigator.pop(context);
-    }
   }
 }

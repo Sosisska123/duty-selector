@@ -94,15 +94,13 @@ class _StudentsListState extends State<StudentsList> {
                                 'Пришел',
                                 () => _setStudentAttendance(
                                   index,
-                                  true,
-                                  AbsenceType.gone,
+                                  AbsenceType.present,
                                 ),
                               )
                             : _generateButton(
                                 'Пропуск',
                                 () => _setStudentAttendance(
                                   index,
-                                  false,
                                   AbsenceType.gone,
                                 ),
                               ),
@@ -116,15 +114,13 @@ class _StudentsListState extends State<StudentsList> {
                                 'Без уважительной',
                                 () => _setStudentAttendance(
                                   index,
-                                  true,
-                                  AbsenceType.goodReason,
+                                  AbsenceType.present,
                                 ),
                               )
                             : _generateButton(
                                 'По уважительной',
                                 () => _setStudentAttendance(
                                   index,
-                                  false,
                                   AbsenceType.goodReason,
                                 ),
                               ),
@@ -133,15 +129,13 @@ class _StudentsListState extends State<StudentsList> {
                                 'Без заявления',
                                 () => _setStudentAttendance(
                                   index,
-                                  true,
-                                  AbsenceType.byApplication,
+                                  AbsenceType.present,
                                 ),
                               )
                             : _generateButton(
                                 'По заявлению',
                                 () => _setStudentAttendance(
                                   index,
-                                  false,
                                   AbsenceType.byApplication,
                                 ),
                               ),
@@ -211,10 +205,9 @@ class _StudentsListState extends State<StudentsList> {
   bool _isStudentSelected(int index) =>
       widget.studentManager.isStudentSelected(index);
 
-  void _setStudentAttendance(int index, bool attend, AbsenceType type) =>
-      setState(() {
-        widget.studentManager.setStudentAttendance(index, attend, type);
-      });
+  void _setStudentAttendance(int index, AbsenceType type) => setState(() {
+    widget.studentManager.setStudentAttendance(index, type);
+  });
 
   void _openStudentHistory(BuildContext context, int index) {
     final student = _getStudent(index);
@@ -227,7 +220,8 @@ class _StudentsListState extends State<StudentsList> {
     );
   }
 
-  bool _isStudentHere(int index) => widget.studentManager.isStudentHere(index);
+  bool _isStudentHere(int index) =>
+      widget.studentManager.isStudentPresent(index);
 
   bool _isStudentWithoutReason(int index) =>
       widget.studentManager.isStudentWithoutReason(index);

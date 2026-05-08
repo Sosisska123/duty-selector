@@ -23,7 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     sub = DutiesEventBus.stream.listen((e) {
-      if (e.isNotEmpty) {
+      if (e.isEmpty) {
+        showEmptySnack(e);
+      } else {
         showSnack(e);
       }
     });
@@ -48,6 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  void showEmptySnack(List<Student> e) {
+    final snackBar = SnackBar(content: Text('Пусто'));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   void showSnack(List<Student> e) {

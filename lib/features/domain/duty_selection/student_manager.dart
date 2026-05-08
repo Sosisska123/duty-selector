@@ -1,151 +1,132 @@
-import 'dart:math';
-
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:duty_selector/features/data/absence_type.dart';
+import 'package:duty_selector/features/data/student_row.dart';
+import 'package:logger/logger.dart';
+
+var logger = Logger();
 
 class StudentManager {
-  final Map<int, Student> students = {};
-  final Map<int, AbsenceType> excludedStudents = {};
+  final Map<int, StudentRow> studentRows = {};
   DatabaseService database;
 
-  StudentManager(this.database, {List<Student>? students}) {
-    if (students != null) {
-      initStudentsMap(students);
-    }
+  StudentManager(
+    this.database, {
+    List<Student>? students,
+    List<Map<Student, AbsenceType>>? studentsAbsences,
+  }) {
+    if (students == null && studentsAbsences == null) return;
+
+    initStudentsMap(students: students, studentsAbsences: studentsAbsences);
   }
 
-  void initStudentsMap(List<Student> students) {
+  void initStudentsMap({
+    List<Student>? students,
+    List<Map<Student, AbsenceType>>? studentsAbsences,
+  }) {
+    if (students == null && studentsAbsences == null) {
+      logger.e('Students and studentsAbsences are null');
+      return;
+    }
+
     // еси менять порядок сортировки то лучше исользовать взде student.id как ключик
-    if (this.students.isEmpty) {
-      for (var i = 0; i < students.length; i++) {
-        this.students[i] = students[i];
+    if (studentRows.isNotEmpty) {
+      logger.i('Students already initialized');
+      return;
+    }
+
+    if (studentsAbsences != null) {
+      for (var i = 0; i < studentsAbsences.length; i++) {
+        final student = studentsAbsences[i].keys.first;
+        final absence = studentsAbsences[i].values.first;
+
+        studentRows[i] = StudentRow(student: student, absenceType: absence);
       }
       return;
     }
+
+    for (var i = 0; i < students!.length; i++) {
+      studentRows[i] = StudentRow(student: students[i]);
+    }
   }
 
-  Map<Student, AbsenceType> getCandidates() {
-    final result = <Student, AbsenceType>{};
-    for (var e in excludedStudents.entries) {
-      final student = getStudent(e.key);
-      if (student == null) continue;
-      result[student] = e.value;
+  Set<Student> getCandidates({bool allPresent = false}) {
+    final result = <Student>{};
+
+    if (allPresent) selectAll(true);
+
+    for (var i = 0; i < studentRows.length; i++) {
+      final student = studentRows[i];
+
+      if (student!.isSelected == true) {
+        result.add(student.student);
+      }
     }
+
+    logger.i('Candidates: $result');
+
     return result;
   }
 
-  // FIXME: ref
-  Map<Student, AbsenceType> getPresentStudents() {
-    final result = <Student, AbsenceType>{};
+  List<Map<Student, AbsenceType>> getChangedAbsentStudents() {
+    final result = <Map<Student, AbsenceType>>[];
 
-    final inluded = students.entries
-        .where((e) => !excludedStudents.containsKey(e.key))
-        .map((e) => e.value);
+    for (var i = 0; i < studentRows.length; i++) {
+      final student = studentRows[i];
 
-    for (var student in inluded) {
-      result[student] = AbsenceType.selected;
+      if (!(student!.isStudentPresent()) && student.hasAbsenceChanged) {
+        result.add({student.student: student.absenceType});
+      }
     }
 
+    logger.i('Changed absent students: $result');
+
     return result;
+  }
+
+  void selectAll(bool value) {
+    for (var entry in studentRows.entries) {
+      setStudentSelected(entry.key, value);
+    }
   }
 
   void setStudentSick(int index, bool setSick) {
     if (!isIndexValid(index)) return;
-    if (setSick) {
-      excludedStudents[index] = AbsenceType.sick;
-    } else {
-      excludedStudents.removeWhere(
-        (id, type) => id == index && type == AbsenceType.sick,
-      );
-    }
+
+    studentRows[index]!.setStudentSick(setSick);
   }
 
   void setStudentSelected(int index, bool setSelected) {
-    if (!isIndexValid(index) || !isStudentHere(index)) return;
-    if (setSelected) {
-      excludedStudents[index] = AbsenceType.selected;
-    } else {
-      excludedStudents.removeWhere(
-        (id, type) => id == index && type == AbsenceType.selected,
-      );
-    }
+    if (!isIndexValid(index) || !isStudentPresent(index)) return;
+
+    studentRows[index]!.setSelected(setSelected);
   }
 
-  void setStudentAttendance(int index, bool attend, AbsenceType type) {
+  void setStudentAttendance(int index, AbsenceType type) {
     if (!isIndexValid(index)) return;
-    if (![
-      AbsenceType.byApplication,
-      AbsenceType.goodReason,
-      AbsenceType.gone,
-    ].contains(type)) {
-      return;
-    }
+    if (type == AbsenceType.sick) return;
 
-    if (attend) {
-      switch (type) {
-        case AbsenceType.byApplication:
-          excludedStudents.removeWhere(
-            (id, t) => id == index && t == AbsenceType.byApplication,
-          );
-          break;
-        case AbsenceType.goodReason:
-          excludedStudents.removeWhere(
-            (id, t) => id == index && t == AbsenceType.goodReason,
-          );
-          break;
-        case AbsenceType.gone:
-          excludedStudents.removeWhere(
-            (id, t) => id == index && t == AbsenceType.gone,
-          );
-          break;
-        default:
-          break;
-      }
-    } else {
-      switch (type) {
-        case AbsenceType.byApplication:
-          excludedStudents[index] = AbsenceType.byApplication;
-          break;
-        case AbsenceType.goodReason:
-          excludedStudents[index] = AbsenceType.goodReason;
-          break;
-        case AbsenceType.gone:
-          excludedStudents[index] = AbsenceType.gone;
-          break;
-        default:
-          break;
-      }
-    }
-
-    logger.i('Set Att $excludedStudents');
+    studentRows[index]!.setStudentAbsence(type);
   }
 
   bool isStudentWithoutReason(int index) {
     if (!isIndexValid(index)) return false;
-    return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == AbsenceType.gone,
-    );
+    return studentRows[index]!.isStudentWithoutReason();
   }
 
   bool isStudentWithGoodReason(int index) {
     if (!isIndexValid(index)) return false;
-    return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == AbsenceType.goodReason,
-    );
+    return studentRows[index]!.isStudentWithGoodReason();
   }
 
   bool isStudentByApplication(int index) {
     if (!isIndexValid(index)) return false;
-    return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == AbsenceType.byApplication,
-    );
+    return studentRows[index]!.isStudentByApplication();
   }
 
   Student? getStudent(int index) {
     if (!isIndexValid(index)) return null;
-    // return students.entries.firstWhere((e) => e.key == index).value;
-    return students[index];
+    return studentRows[index]!.student;
   }
 
   bool isStudentImmune(int index) {
@@ -155,52 +136,20 @@ class StudentManager {
 
   bool isStudentSick(int index) {
     if (!isIndexValid(index)) return false;
-    return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == AbsenceType.sick,
-    );
+    return studentRows[index]!.isStudentSick();
   }
 
   bool isStudentSelected(int index) {
     if (!isIndexValid(index)) return false;
-    return excludedStudents.entries.any(
-      (e) => e.key == index && e.value == AbsenceType.selected,
-    );
-  }
-
-  Future<List<Student>> getStudentsFromDB() async {
-    return database.getStudents();
-  }
-
-  Future<void> initAbsentStudentsFromDB() async {
-    final missing = await database.getAbsenceNowStudents();
-    for (var e in missing) {
-      final type = AbsenceType.fromString(e.values.first.reason);
-      excludedStudents[e.keys.first.id!] = type;
-    }
-  }
-
-  void setAllSelected(bool value) {
-    if (value) {
-      for (var entry in students.entries) {
-        setStudentSelected(entry.key, true);
-      }
-    } else {
-      for (var entry in students.entries) {
-        setStudentSelected(entry.key, false);
-      }
-    }
+    return studentRows[index]!.isSelected;
   }
 
   int get studentsMapLen {
-    return students.length;
+    return studentRows.length;
   }
 
-  bool isStudentHere(int index) =>
-      !excludedStudents.containsKey(index) ||
-      !excludedStudents.entries.any(
-        (e) => e.key == index && e.value != AbsenceType.selected,
-      );
+  bool isStudentPresent(int index) => studentRows[index]!.isStudentPresent();
 
   bool isIndexValid(int index) =>
-      (students.isEmpty || index >= studentsMapLen) ? false : true;
+      (studentRows.isEmpty || index >= studentsMapLen) ? false : true;
 }
