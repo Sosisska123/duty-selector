@@ -14,11 +14,12 @@ class ButtonsGroup extends StatelessWidget {
         color: AppColors.secondary,
         borderRadius: .circular(16),
       ),
-      padding: const .all(AppRadius.small),
+      padding: const .all(AppSpacing.xsmall),
+      margin: const .symmetric(horizontal: 12),
       child: ListView.separated(
         shrinkWrap: true,
         itemBuilder: (context, index) => Padding(
-          padding: const .symmetric(vertical: AppRadius.medium),
+          padding: const .symmetric(vertical: AppSpacing.small),
           child: children[index],
         ),
         separatorBuilder: (context, index) => const Divider(
