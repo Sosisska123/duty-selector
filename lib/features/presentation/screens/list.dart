@@ -1,9 +1,9 @@
-import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/presentation/screens/lists/attendance_list.dart';
 import 'package:duty_selector/features/presentation/screens/lists/duty_list.dart';
 import 'package:duty_selector/features/presentation/screens/lists/group_list.dart';
-import 'package:duty_selector/features/presentation/widgets/cards/list_card.dart';
+import 'package:duty_selector/features/presentation/widgets/buttons_group/buttons_group.dart';
+import 'package:duty_selector/features/presentation/widgets/buttons_group/group_button.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -25,24 +25,22 @@ class ListScreen extends StatelessWidget {
         centerTitle: true,
         title: const TitleText(text: 'Записи'),
       ),
-      body: Column(
-        spacing: AppSpacing.small,
+      body: ButtonsGroup(
         children: [
-          ListCard(
-            tapCallback: () => _openList(context, 'group'),
-            icon: const Icon(Ionicons.people_circle, color: AppColors.accent),
+          GroupButton(
+            icon: Ionicons.people_circle,
             text: 'Список группы',
+            tapCallback: () => _openList(context, 'group'),
           ),
-          ListCard(
-            tapCallback: () => _openList(context, 'duty'),
-            icon: const Icon(Ionicons.people_circle, color: AppColors.accent),
+          GroupButton(
+            icon: Ionicons.people_circle,
             text: 'Дежурства',
+            tapCallback: () => _openList(context, 'duty'),
           ),
-          ListCard(
-            // tapCallback: () => _openList(context, 'attendance'),
-            tapCallback: () => {},
-            icon: const Icon(Ionicons.people_circle, color: AppColors.accent),
+          GroupButton(
+            icon: Ionicons.people_circle,
             text: 'Посещаемость (пока недоступно)',
+            tapCallback: () => {},
           ),
         ],
       ),

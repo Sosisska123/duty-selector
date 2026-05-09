@@ -28,10 +28,13 @@ class GroupButton extends StatelessWidget {
         child: Ink(
           decoration: const BoxDecoration(color: AppColors.secondary),
           child: Padding(
-            padding: .symmetric(vertical: height),
+            padding: .symmetric(
+              vertical: height,
+              horizontal: AppSpacing.xsmall,
+            ),
             child: Row(
               children: [
-                if (icon != null) Icon(icon),
+                if (icon != null) Icon(icon, color: AppColors.accent),
                 if (icon != null && text.isNotEmpty) const SizedBox(width: 8),
                 if (text.isNotEmpty) RegularText(text: text),
               ],
