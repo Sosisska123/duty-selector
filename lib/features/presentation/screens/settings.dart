@@ -8,6 +8,7 @@ import 'package:duty_selector/features/presentation/widgets/buttons_group/group_
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/title_text.dart';
 import 'package:duty_selector/utils/student_parser.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
@@ -39,26 +40,36 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
           ),
-          const TitleText(text: 'Dev'),
-          ButtonsGroup(
-            children: [
-              GroupButton(
-                text: 'Добавить 10 рандом пропусков',
-                tapCallback: () => _mockAbsences(databaseService, 10),
-              ),
-              GroupButton(
-                text: 'Очистить пропуски',
-                tapCallback: () => _clearAbsences(databaseService),
-              ),
-              GroupButton(
-                text: 'Вывести пропуски в консоль',
-                tapCallback: () => _selectAbsences(databaseService),
-              ),
-            ],
-          ),
+          if (kDebugMode) const TitleText(text: 'Dev'),
+          if (kDebugMode)
+            ButtonsGroup(
+              children: [
+                GroupButton(
+                  text: 'Добавить 10 рандом пропусков',
+                  tapCallback: () => _mockAbsences(databaseService, 10),
+                ),
+                GroupButton(
+                  text: 'Очистить пропуски',
+                  tapCallback: () => _clearAbsences(databaseService),
+                ),
+                GroupButton(
+                  text: 'Вывести пропуски в консоль',
+                  tapCallback: () => _selectAbsences(databaseService),
+                ),
+                GroupButton(
+                  text: 'Очистить дежурства',
+                  tapCallback: () => _clearDuties(databaseService),
+                ),
+              ],
+            ),
         ],
       ),
     );
+  }
+
+  void _clearDuties(final DatabaseService databaseService) async {
+    final rowsCount = await databaseService.clear('duties');
+    logger.d('Deleted $rowsCount from duties');
   }
 }
 
