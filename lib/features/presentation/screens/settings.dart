@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:duty_selector/features/data/absence_type.dart';
+import 'package:duty_selector/features/data/models/absence.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:duty_selector/features/presentation/widgets/buttons_group/buttons_group.dart';
 import 'package:duty_selector/features/presentation/widgets/buttons_group/group_button.dart';
@@ -20,15 +24,37 @@ class SettingsScreen extends StatelessWidget {
         centerTitle: true,
         title: const TitleText(text: 'Настройки'),
       ),
-      body: ButtonsGroup(
+      body: Column(
+        crossAxisAlignment: .start,
         children: [
-          GroupButton(
-            text: 'Загрузить список группы',
-            tapCallback: () => _loadStudsFromFile(context, databaseService),
+          ButtonsGroup(
+            children: [
+              GroupButton(
+                text: 'Загрузить список группы',
+                tapCallback: () => _loadStudsFromFile(context, databaseService),
+              ),
+              GroupButton(
+                text: 'Очистить список группы',
+                tapCallback: () => _clearStudents(context, databaseService),
+              ),
+            ],
           ),
-          GroupButton(
-            text: 'Очистить список группы',
-            tapCallback: () => _clearStudents(context, databaseService),
+          const TitleText(text: 'Dev'),
+          ButtonsGroup(
+            children: [
+              GroupButton(
+                text: 'Добавить 10 рандом пропусков',
+                tapCallback: () => _mockAbsences(databaseService, 10),
+              ),
+              GroupButton(
+                text: 'Очистить пропуски',
+                tapCallback: () => _clearAbsences(databaseService),
+              ),
+              GroupButton(
+                text: 'Вывести пропуски в консоль',
+                tapCallback: () => _selectAbsences(databaseService),
+              ),
+            ],
           ),
         ],
       ),
@@ -75,6 +101,38 @@ void _loadStudsFromFile(
   if (context.mounted) {
     snackText(context, 'Успешно загружено ${students.length} студентов');
   }
+}
+
+void _mockAbsences(
+  final DatabaseService databaseService,
+  final int count,
+) async {
+  for (int i = 0; i < count; i++) {
+    await databaseService.addAbsence(
+      Absence(
+        reason: [
+          AbsenceType.sick.name,
+          AbsenceType.gone.name,
+          AbsenceType.goodReason.name,
+          AbsenceType.byApplication.name,
+        ].elementAt(Random().nextInt(4)),
+        date: DateTime.now(),
+        studentId: Random().nextInt(26) + 1,
+        expireDuration: 80,
+      ),
+    );
+  }
+  logger.i('Mocked $count Absences');
+}
+
+void _clearAbsences(final DatabaseService databaseService) async {
+  var count = await databaseService.clear('absences');
+  logger.i('Cleared $count from absences');
+}
+
+void _selectAbsences(final DatabaseService databaseService) async {
+  var students = await databaseService.getAbsences();
+  logger.i(students);
 }
 
 void snackText(final BuildContext context, final String text) {
