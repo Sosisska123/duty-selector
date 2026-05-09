@@ -39,7 +39,7 @@ class _StudentHistoryState extends State<StudentHistory> {
         child: Icon(Ionicons.add, color: AppColors.text),
       ),
       body: FutureBuilder(
-        future: _getStudentsList(),
+        future: _getStudentsAbsences(),
         builder: (c, s) {
           if (!s.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -59,7 +59,7 @@ class _StudentHistoryState extends State<StudentHistory> {
 
           return ListView.builder(
             itemCount: s.data!.length,
-            itemBuilder: (c, idx) => _buildList(s.data!, idx),
+            itemBuilder: (c, idx) => _buildList(context, s.data!, idx),
           );
         },
       ),
@@ -68,16 +68,38 @@ class _StudentHistoryState extends State<StudentHistory> {
 
   void _addAbsence(BuildContext context) {}
 
-  Future<List<Absence>> _getStudentsList() async =>
+  Future<List<Absence>> _getStudentsAbsences() async =>
       await widget.databaseService.getWeekAbsencesFor(widget.student.id);
 
-  Widget _buildList(List<Absence> list, int index) {
+  Widget _buildList(
+    final BuildContext context,
+    final List<Absence> list,
+    final int index,
+  ) {
     final absence = list[index];
 
     return AbsenceHistoryCard(
       absence,
-      deleteCallback: () => {},
+      deleteCallback: () => setState(() {
+        _deleteAbsence(context, widget.databaseService, absence.id!);
+      }),
       editCallback: () => {},
     );
   }
+}
+
+void _deleteAbsence(
+  final BuildContext context,
+  final DatabaseService databaseService,
+  final int absenceId,
+) async {
+  await databaseService.deleteAbsence(absenceId);
+  if (context.mounted) {
+    snackText(context, 'Запись удалена');
+  }
+}
+
+void snackText(final BuildContext context, final String text) {
+  final snackBar = SnackBar(content: Text(text));
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }

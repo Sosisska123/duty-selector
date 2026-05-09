@@ -22,14 +22,14 @@ class AbsenceHistoryCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.medium),
+        borderRadius: .circular(AppRadius.medium),
         child: Ink(
           decoration: BoxDecoration(
             color: AppColors.secondary,
-            borderRadius: BorderRadius.circular(AppRadius.medium),
+            borderRadius: .circular(AppRadius.medium),
           ),
           child: Padding(
-            padding: const EdgeInsetsGeometry.all(AppSpacing.medium),
+            padding: const .all(AppSpacing.medium),
             child: _generateCard(),
           ),
         ),
@@ -79,13 +79,16 @@ class AbsenceHistoryCard extends StatelessWidget {
         SizedBox(height: AppSpacing.xsmall),
 
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          spacing: AppSpacing.small,
+          mainAxisAlignment: .end,
           children: [
             ElevatedButton(
+              style: ButtonStyle(side: WidgetStatePropertyAll(.none)),
               onPressed: editCallback,
               child: RegularText(text: 'Изменить'),
             ),
             ElevatedButton(
+              style: ButtonStyle(side: WidgetStatePropertyAll(.none)),
               onPressed: deleteCallback,
               child: RegularText(text: 'Удалить'),
             ),

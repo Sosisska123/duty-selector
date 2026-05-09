@@ -232,9 +232,14 @@ class DatabaseService {
       's.last_name, '
       'a.reason '
       'FROM students s '
-      '${includeAll ? "LEFT JOIN absences a " : "INNER JOIN absences a "}'
-      'ON a.student_id = s.id '
-      "AND datetime(a.date, '' || a.expire_time || ' minutes') > datetime('now', 'localtime')",
+      '${includeAll ? "LEFT JOIN" : "INNER JOIN"} absences a '
+      'ON a.id = ('
+      '  SELECT id FROM absences a2 '
+      '  WHERE a2.student_id = s.id '
+      "  AND datetime(a2.date, '' || a2.expire_time || ' minutes') > datetime('now', 'localtime') "
+      '  ORDER BY a2.id DESC, a2.id DESC '
+      '  LIMIT 1 '
+      ')',
     );
 
     List<Map<Student, AbsenceType>> result = [];
@@ -254,7 +259,8 @@ class DatabaseService {
       result.add({stud: absenceType});
     }
 
-    logger.i('Absence now: $result');
+    logger.i('Absence now:');
+    logger.i(result);
 
     return result;
   }
@@ -280,6 +286,20 @@ class DatabaseService {
     );
 
     logger.i('Remove last absence from: $studentId');
+  }
+
+  Future<int> deleteAbsence(int absenceId) async {
+    final db = await database;
+
+    final rowsCount = await db.delete(
+      'absences',
+      where: 'id = ?',
+      whereArgs: [absenceId],
+    );
+
+    logger.i('Delete absence $absenceId');
+
+    return rowsCount;
   }
 
   // endregion

@@ -218,6 +218,7 @@ class _StudentsListState extends State<StudentsList> {
         databaseService: widget.studentManager.database,
       ),
     );
+    // TODO: maybe add event bus to react to absencse list changes
   }
 
   bool _isStudentHere(int index) =>
