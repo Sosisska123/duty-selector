@@ -68,14 +68,14 @@ class StudentManager {
     return result;
   }
 
-  List<Map<Student, AbsenceType>> getChangedAbsentStudents() {
-    final result = <Map<Student, AbsenceType>>[];
+  Map<Student, AbsenceType> getChangedAbsentStudents() {
+    final result = <Student, AbsenceType>{};
 
     for (var i = 0; i < studentRows.length; i++) {
-      final student = studentRows[i];
+      final studentRow = studentRows[i];
 
-      if (student!.hasAbsenceChanged) {
-        result.add({student.student: student.absenceType});
+      if (studentRow!.hasAbsenceChanged) {
+        result[studentRow.student] = studentRow.absenceType;
       }
     }
 

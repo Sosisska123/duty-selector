@@ -157,18 +157,16 @@ class _StudentsPageState extends State<StudentsPage> {
     }
   }
 
-  Future saveAbsentStudents(
-    List<Map<Student, AbsenceType>> absentStudents,
-  ) async {
+  Future saveAbsentStudents(Map<Student, AbsenceType> chngedStudents) async {
     Future.wait(
-      absentStudents.map(
-        (e) => e.values.first == AbsenceType.present
-            ? widget.databaseService.removeLastAbsence(e.keys.first.id!)
+      chngedStudents.entries.map(
+        (e) => e.value == AbsenceType.present
+            ? widget.databaseService.removeLastAbsence(e.key.id!)
             : widget.databaseService.addAbsence(
                 Absence(
-                  studentId: e.keys.first.id!,
-                  reason: e.values.first.name,
-                  date: DateTime.now(),
+                  studentId: e.key.id!,
+                  reason: e.value.name,
+                  date: .now(),
                   expireDuration: 80,
                 ),
               ),
