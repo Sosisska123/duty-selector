@@ -1,8 +1,8 @@
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/database.dart';
-import 'package:duty_selector/features/data/models/absence.dart';
+import 'package:duty_selector/features/data/models/duty.dart';
 import 'package:duty_selector/features/data/models/student.dart';
-import 'package:duty_selector/features/presentation/widgets/cards/absence_history_card.dart';
+import 'package:duty_selector/features/presentation/widgets/cards/duty_history_card.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:flutter/material.dart';
@@ -11,35 +11,37 @@ import 'package:logger/logger.dart';
 
 var logger = Logger();
 
-class StudentHistory extends StatefulWidget {
+class DutiesHistory extends StatefulWidget {
   final Student student;
   final DatabaseService databaseService;
 
-  const StudentHistory({
+  const DutiesHistory({
     super.key,
     required this.student,
     required this.databaseService,
   });
 
   @override
-  State<StudentHistory> createState() => _StudentHistoryState();
+  State<DutiesHistory> createState() => _DutiesHistoryState();
 }
 
-class _StudentHistoryState extends State<StudentHistory> {
+class _DutiesHistoryState extends State<DutiesHistory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        title: RegularText(text: 'История ${widget.student.initialsFirstname}'),
+        title: RegularText(
+          text: 'Дежурства ${widget.student.initialsFirstname}',
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.secondary,
-        onPressed: () => _addAbsence(context),
-        child: Icon(Ionicons.add, color: AppColors.text),
+        onPressed: () => _addDuty(context),
+        child: const Icon(Ionicons.add, color: AppColors.text),
       ),
       body: FutureBuilder(
-        future: _getStudentsAbsences(),
+        future: _getStudentDuties(),
         builder: (c, s) {
           if (!s.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -54,7 +56,7 @@ class _StudentHistoryState extends State<StudentHistory> {
           }
 
           if (s.data!.isEmpty) {
-            return Center(child: AccentText(text: 'Пусто'));
+            return const Center(child: AccentText(text: 'Пусто'));
           }
 
           return ListView.builder(
@@ -66,34 +68,37 @@ class _StudentHistoryState extends State<StudentHistory> {
     );
   }
 
-  void _addAbsence(BuildContext context) {}
+  void _addDuty(BuildContext context) {
+    snackText(context, 'Пока не работает');
+  }
 
-  Future<List<Absence>> _getStudentsAbsences() async =>
-      await widget.databaseService.getWeekAbsencesFor(widget.student.id);
+  Future<List<Duty>> _getStudentDuties() async =>
+      await widget.databaseService.getLastDutiesFor(widget.student.id!);
 
   Widget _buildList(
     final BuildContext context,
-    final List<Absence> list,
+    final List<Duty> list,
     final int index,
   ) {
-    final absence = list[index];
+    final duty = list[index];
 
-    return AbsenceHistoryCard(
-      absence,
+    return DutyHistoryCard(
+      duty,
       deleteCallback: () => setState(() {
-        _deleteAbsence(context, widget.databaseService, absence.id!);
+        _deleteDuty(context, widget.databaseService, duty.id!);
       }),
-      editCallback: () => {},
+      editCallback: () => snackText(context, 'Пока не работает'),
     );
   }
 }
 
-void _deleteAbsence(
+void _deleteDuty(
   final BuildContext context,
   final DatabaseService databaseService,
-  final int absenceId,
+  final int dutyId,
 ) async {
-  await databaseService.deleteAbsence(absenceId);
+  await databaseService.deleteDuty(dutyId);
+
   if (context.mounted) {
     snackText(context, 'Запись удалена');
   }

@@ -189,6 +189,33 @@ class DatabaseService {
     return result.map((e) => Student.fromMap(e)).toSet();
   }
 
+  Future<List<Duty>> getLastDutiesFor(int id) async {
+    final db = await database;
+
+    final result = await db.query(
+      'duties',
+      where: 'student_id = ?',
+      whereArgs: [id],
+      orderBy: 'date DESC',
+    );
+
+    return result.map((e) => Duty.fromMap(e)).toList();
+  }
+
+  Future<int> deleteDuty(int dutyId) async {
+    final db = await database;
+
+    final rowsCount = await db.delete(
+      'duties',
+      where: 'id = ?',
+      whereArgs: [dutyId],
+    );
+
+    logger.i('Delete duty $dutyId');
+
+    return rowsCount;
+  }
+
   // absences
   Future<bool> addAbsence(Absence absence) async {
     final db = await database;
@@ -204,8 +231,9 @@ class DatabaseService {
     return true;
   }
 
-  Future<List<Absence>> getWeekAbsencesFor(int? id) async {
+  Future<List<Absence>> getWeekAbsencesFor(int id) async {
     final db = await database;
+    //TODO: remove limit
 
     final result = await db.query(
       'absences',

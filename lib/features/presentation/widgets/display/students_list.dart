@@ -1,6 +1,7 @@
 import 'package:duty_selector/features/data/absence_type.dart';
 import 'package:duty_selector/features/domain/duty_selection/student_manager.dart';
-import 'package:duty_selector/features/presentation/screens/student_history.dart';
+import 'package:duty_selector/features/presentation/screens/absences_history.dart';
+import 'package:duty_selector/features/presentation/screens/duties_history.dart';
 import 'package:duty_selector/features/presentation/widgets/statuses/bordered_square.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:duty_selector/design.dart';
@@ -61,9 +62,18 @@ class _StudentsListState extends State<StudentsList> {
                 padding: EdgeInsets.all(AppSpacing.small),
                 child: Column(
                   children: [
-                    _generateButton(
-                      'История',
-                      () => _openStudentHistory(context, index),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _generateButton(
+                          'Посещаемость',
+                          () => _openStudentAbsences(context, index),
+                        ),
+                        _generateButton(
+                          'Дежурства',
+                          () => _openStudentDuties(context, index),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -141,9 +151,18 @@ class _StudentsListState extends State<StudentsList> {
                               ),
                       ],
                     ),
-                    _generateButton(
-                      'История',
-                      () => _openStudentHistory(context, index),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _generateButton(
+                          'Посещаемость',
+                          () => _openStudentAbsences(context, index),
+                        ),
+                        _generateButton(
+                          'Дежурства',
+                          () => _openStudentDuties(context, index),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -209,11 +228,11 @@ class _StudentsListState extends State<StudentsList> {
     widget.studentManager.setStudentAttendance(index, type);
   });
 
-  void _openStudentHistory(BuildContext context, int index) {
+  void _openStudentAbsences(BuildContext context, int index) {
     final student = _getStudent(index);
     PersistentNavBarNavigator.pushNewScreen(
       context,
-      screen: StudentHistory(
+      screen: AbsencesHistory(
         student: student!,
         databaseService: widget.studentManager.database,
       ),
@@ -232,6 +251,17 @@ class _StudentsListState extends State<StudentsList> {
 
   bool _isStudentByApplication(int index) =>
       widget.studentManager.isStudentByApplication(index);
+
+  void _openStudentDuties(BuildContext context, int index) {
+    final student = _getStudent(index);
+    PersistentNavBarNavigator.pushNewScreen(
+      context,
+      screen: DutiesHistory(
+        student: student!,
+        databaseService: widget.studentManager.database,
+      ),
+    );
+  }
 }
 
 ElevatedButton _generateButton(String text, Function() onPressed) {
