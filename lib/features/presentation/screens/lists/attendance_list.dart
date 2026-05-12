@@ -78,6 +78,7 @@ class AttendanceList extends StatelessWidget {
             return AddAbsenceModal(
               scrollController: scrollController,
               databaseService: databaseService,
+              studentId: 1, // TODO:
             );
           },
         );

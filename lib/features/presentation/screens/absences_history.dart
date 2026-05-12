@@ -2,6 +2,7 @@ import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/absence.dart';
 import 'package:duty_selector/features/data/models/student.dart';
+import 'package:duty_selector/features/presentation/screens/modal/add_absence_modal.dart';
 import 'package:duty_selector/features/presentation/widgets/cards/absence_history_card.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
@@ -37,7 +38,7 @@ class _AbsencesHistoryState extends State<AbsencesHistory> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.secondary,
-        onPressed: () => _addAbsence(context),
+        onPressed: () => _addAbsence(context, widget.databaseService),
         child: const Icon(Ionicons.add, color: AppColors.text),
       ),
       body: FutureBuilder(
@@ -68,8 +69,11 @@ class _AbsencesHistoryState extends State<AbsencesHistory> {
     );
   }
 
-  void _addAbsence(BuildContext context) {
-    snackText(context, 'Пока не работает');
+  void _addAbsence(
+    final BuildContext context,
+    final DatabaseService databaseService,
+  ) {
+    _showModal(context, databaseService, widget.student.id!);
   }
 
   Future<List<Absence>> _getStudentAbsences() async =>
@@ -107,4 +111,35 @@ void _deleteAbsence(
 void snackText(final BuildContext context, final String text) {
   final snackBar = SnackBar(content: Text(text));
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+void _showModal(
+  final BuildContext context,
+  final DatabaseService databaseService,
+  final int studentId,
+) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: .vertical(top: .circular(15)),
+    ),
+    backgroundColor: Colors.transparent,
+    builder: (BuildContext context) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        minChildSize: 0.4,
+        maxChildSize: 0.75,
+        expand: false,
+        snap: true,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return AddAbsenceModal(
+            databaseService: databaseService,
+            scrollController: scrollController,
+            studentId: studentId,
+          );
+        },
+      );
+    },
+  );
 }

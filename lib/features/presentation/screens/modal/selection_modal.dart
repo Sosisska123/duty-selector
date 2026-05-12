@@ -50,7 +50,7 @@ class SelectionModal extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   dropdownMenuEntries: _entries(),
                   onSelected: (value) {
-                    dutyType = _entries()[value!].label;
+                    dutyType = _entries()[value! - 1].label;
                   },
                 ),
                 const SizedBox(height: AppSpacing.medium),

@@ -61,6 +61,17 @@ ThemeData getTheme() {
       hintStyle: AppTextStyles.accent,
     ),
     snackBarTheme: SnackBarThemeData(backgroundColor: AppColors.secondary),
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: AppColors.background,
+      todayForegroundColor: .all(AppColors.text),
+      dayForegroundColor: .all(AppColors.text),
+      yearForegroundColor: .all(AppColors.text),
+      dayStyle: AppTextStyles.regular,
+      toggleButtonTextStyle: AppTextStyles.regular,
+      weekdayStyle: TextStyle(color: AppColors.text),
+      headerForegroundColor: AppColors.text,
+      locale: const Locale('ru', 'RU'),
+    ),
   );
 }
 
