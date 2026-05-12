@@ -1,22 +1,18 @@
 import 'package:duty_selector/design.dart';
-import 'package:duty_selector/features/data/absence_type.dart';
 import 'package:duty_selector/features/data/database.dart';
-import 'package:duty_selector/features/data/models/absence.dart';
+import 'package:duty_selector/features/data/models/duty.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:logger/logger.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
-var logger = Logger();
-
-class AddAbsenceModal extends StatefulWidget {
+class AddDutyModal extends StatefulWidget {
   final ScrollController scrollController;
   final DatabaseService databaseService;
   final int studentId;
 
-  const AddAbsenceModal({
+  const AddDutyModal({
     super.key,
     required this.scrollController,
     required this.databaseService,
@@ -24,21 +20,17 @@ class AddAbsenceModal extends StatefulWidget {
   });
 
   @override
-  State<AddAbsenceModal> createState() => _AddAbsenceModalState();
+  State<AddDutyModal> createState() => _AddDutyModalState();
 }
 
-class _AddAbsenceModalState extends State<AddAbsenceModal> {
-  late final TextEditingController durationController;
-  late final TextEditingController lessonController;
+class _AddDutyModalState extends State<AddDutyModal> {
   late final TextEditingController dateController;
 
-  String? absenceType;
+  String dutyType = _entries()[0].label;
   DateTime selectedDate = .now();
 
   @override
   void initState() {
-    durationController = TextEditingController(text: "120");
-    lessonController = TextEditingController();
     dateController = TextEditingController(
       text: DateFormat('dd.MM.yyyy').format(selectedDate),
     );
@@ -48,8 +40,6 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
 
   @override
   void dispose() {
-    durationController.dispose();
-    lessonController.dispose();
     dateController.dispose();
     super.dispose();
   }
@@ -70,24 +60,19 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
               controller: widget.scrollController,
               shrinkWrap: true,
               children: [
-                const Center(
-                  child: RegularText(text: 'Добавить запись о посещаемости'),
-                ),
+                const Center(child: RegularText(text: 'Добавить дежурство')),
 
-                const SizedBox(height: AppSpacing.large),
+                SizedBox(height: AppSpacing.large),
 
                 DropdownMenu(
-                  label: const Text(
-                    'Тип пропуска',
-                    style: AppTextStyles.regular,
-                  ),
+                  label: Text('Тип дежурства', style: AppTextStyles.regular),
                   initialSelection: 1,
                   enableFilter: true,
                   textStyle: AppTextStyles.regular,
                   width: MediaQuery.of(context).size.width,
                   dropdownMenuEntries: _entries(),
                   onSelected: (value) {
-                    absenceType = _entries()[value! - 1].label;
+                    dutyType = _entries()[value! - 1].label;
                   },
                 ),
 
@@ -130,47 +115,17 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
 
                 const SizedBox(height: AppSpacing.xsmall),
 
-                TextField(
-                  autocorrect: true,
-                  decoration: InputDecoration(
-                    hintText: 'Длителность (в минутах)',
-                    hintStyle: AppTextStyles.smallAccent,
-                  ),
-                  style: AppTextStyles.regular,
-                  keyboardType: .number,
-                  controller: durationController,
-                ),
-
-                const SizedBox(height: AppSpacing.xsmall),
-
-                TextField(
-                  autocorrect: true,
-                  decoration: InputDecoration(
-                    hintText: 'Пара (необязательно)',
-                    hintStyle: AppTextStyles.smallAccent,
-                  ),
-                  style: AppTextStyles.regular,
-                  controller: lessonController,
-                ),
-
-                const SizedBox(height: AppSpacing.xsmall),
-
                 ElevatedButton(
                   onPressed: () async {
-                    final absence = Absence(
-                      reason: absenceType ?? _entries()[0].label,
+                    final duty = Duty(
+                      type: dutyType,
                       date: selectedDate,
                       studentId: widget.studentId,
-                      expireDuration:
-                          int.tryParse(durationController.text) ?? 120,
-                      lessonName: lessonController.text.isEmpty
-                          ? null
-                          : lessonController.text,
                     );
 
-                    logger.i(absence);
+                    logger.i(duty);
 
-                    await widget.databaseService.addAbsence(absence);
+                    await widget.databaseService.addDuty(duty);
 
                     // TODO: make it update visually
                     if (context.mounted) {
@@ -186,22 +141,17 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
       ),
     );
   }
+}
 
-  List<DropdownMenuEntry<int>> _entries() {
-    List<DropdownMenuEntry<int>> entries = List.empty(growable: true);
+List<DropdownMenuEntry<int>> _entries() {
+  List<DropdownMenuEntry<int>> entries = List.empty(growable: true);
 
-    for (var i = 0; i < AbsenceType.values.length; i++) {
-      var name = AbsenceType.values[i];
+  // TODO: Get entries from the file
 
-      if (name == AbsenceType.selected || name == AbsenceType.present) continue;
+  entries.add(const DropdownMenuEntry(value: 0, label: "На улице"));
+  entries.add(const DropdownMenuEntry(value: 1, label: "В кабинете"));
 
-      entries.add(
-        DropdownMenuEntry(value: i, label: AbsenceType.values[i].name),
-      );
-    }
-
-    return entries;
-  }
+  return entries;
 }
 
 Future<DateTime?> _selectDate(

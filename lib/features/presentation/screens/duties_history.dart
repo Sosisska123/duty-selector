@@ -2,6 +2,7 @@ import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/duty.dart';
 import 'package:duty_selector/features/data/models/student.dart';
+import 'package:duty_selector/features/presentation/screens/modal/add_duty_modal.dart';
 import 'package:duty_selector/features/presentation/widgets/cards/duty_history_card.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
@@ -37,7 +38,7 @@ class _DutiesHistoryState extends State<DutiesHistory> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.secondary,
-        onPressed: () => _addDuty(context),
+        onPressed: () => _addDuty(context, widget.databaseService),
         child: const Icon(Ionicons.add, color: AppColors.text),
       ),
       body: FutureBuilder(
@@ -68,8 +69,11 @@ class _DutiesHistoryState extends State<DutiesHistory> {
     );
   }
 
-  void _addDuty(BuildContext context) {
-    snackText(context, 'Пока не работает');
+  void _addDuty(
+    final BuildContext context,
+    final DatabaseService databaseService,
+  ) {
+    _showModal(context, databaseService, widget.student.id!);
   }
 
   Future<List<Duty>> _getStudentDuties() async =>
@@ -107,4 +111,35 @@ void _deleteDuty(
 void snackText(final BuildContext context, final String text) {
   final snackBar = SnackBar(content: Text(text));
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+void _showModal(
+  final BuildContext context,
+  final DatabaseService databaseService,
+  final int studentId,
+) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: .vertical(top: .circular(15)),
+    ),
+    backgroundColor: Colors.transparent,
+    builder: (BuildContext context) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        minChildSize: 0.4,
+        maxChildSize: 0.75,
+        expand: false,
+        snap: true,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return AddDutyModal(
+            databaseService: databaseService,
+            scrollController: scrollController,
+            studentId: studentId,
+          );
+        },
+      );
+    },
+  );
 }
