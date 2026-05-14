@@ -93,40 +93,7 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
 
                 const SizedBox(height: AppSpacing.xsmall),
 
-                Stack(
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Дата',
-                        hintStyle: AppTextStyles.smallAccent,
-                      ),
-                      style: AppTextStyles.regular,
-                      readOnly: true,
-                      controller: dateController,
-                    ),
-                    Align(
-                      alignment: .centerEnd,
-                      child: IconButton(
-                        onPressed: () async {
-                          final date = await _selectDate(context, selectedDate);
-
-                          if (date == null) return;
-
-                          setState(() {
-                            selectedDate = date;
-                            dateController.text = DateFormat(
-                              'dd.MM.yyyy',
-                            ).format(selectedDate);
-                          });
-                        },
-                        icon: const Icon(
-                          Ionicons.calendar,
-                          color: AppColors.text,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                _buildDateField(),
 
                 const SizedBox(height: AppSpacing.xsmall),
 
@@ -156,27 +123,7 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
                 const SizedBox(height: AppSpacing.xsmall),
 
                 ElevatedButton(
-                  onPressed: () async {
-                    final absence = Absence(
-                      reason: absenceType ?? _entries()[0].label,
-                      date: selectedDate,
-                      studentId: widget.studentId,
-                      expireDuration:
-                          int.tryParse(durationController.text) ?? 120,
-                      lessonName: lessonController.text.isEmpty
-                          ? null
-                          : lessonController.text,
-                    );
-
-                    logger.i(absence);
-
-                    await widget.databaseService.addAbsence(absence);
-
-                    // TODO: make it update visually
-                    if (context.mounted) {
-                      PersistentNavBarNavigator.pop(context);
-                    }
-                  },
+                  onPressed: () => addAbsence(context),
                   child: const RegularText(text: 'Добавить'),
                 ),
               ],
@@ -185,6 +132,23 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
         ],
       ),
     );
+  }
+
+  Future<void> addAbsence(BuildContext context) async {
+    final absence = Absence(
+      reason: absenceType ?? _entries()[0].label,
+      date: selectedDate,
+      studentId: widget.studentId,
+      expireDuration: int.tryParse(durationController.text) ?? 120,
+      lessonName: lessonController.text.isEmpty ? null : lessonController.text,
+    );
+
+    await widget.databaseService.addAbsence(absence);
+
+    // TODO: make it update visually
+    if (context.mounted) {
+      PersistentNavBarNavigator.pop(context);
+    }
   }
 
   List<DropdownMenuEntry<int>> _entries() {
@@ -202,18 +166,44 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
 
     return entries;
   }
+
+  TextField _buildDateField() {
+    return TextField(
+      controller: dateController,
+      style: AppTextStyles.regular,
+      readOnly: true,
+      decoration: InputDecoration(
+        hintText: 'Дата',
+        hintStyle: AppTextStyles.smallAccent,
+        suffixIcon: IconButton(
+          onPressed: _pickDate,
+          icon: const Icon(Ionicons.calendar, color: AppColors.text),
+        ),
+      ),
+      onTap: _pickDate,
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final date = await _selectDate(context, selectedDate);
+
+    if (date == null) return;
+
+    setState(() {
+      selectedDate = date;
+      dateController.text = DateFormat('dd.MM.yyyy').format(selectedDate);
+    });
+  }
 }
 
 Future<DateTime?> _selectDate(
   final BuildContext context,
   final DateTime initialDate,
 ) async {
-  DateTime? pickedDate = await showDatePicker(
+  return await showDatePicker(
     context: context,
     initialDate: initialDate,
     firstDate: initialDate.subtract(const Duration(days: 365)),
     lastDate: initialDate.add(const Duration(days: 365)),
   );
-
-  return pickedDate;
 }
