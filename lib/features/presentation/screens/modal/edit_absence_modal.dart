@@ -229,5 +229,5 @@ class _EditAbsenceModalState extends State<EditAbsenceModal> {
     });
   }
 
-  bool _validateDuration(String value) => min(int.tryParse(value) ?? 0, 0) > 0;
+  bool _validateDuration(String value) => max(int.tryParse(value) ?? 0, 0) > 0;
 }

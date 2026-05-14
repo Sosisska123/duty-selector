@@ -216,7 +216,7 @@ class DatabaseService {
     return rowsCount;
   }
 
-  Future<int>? updateDuty(int oldDutyId, Duty newDuty) async {
+  Future<int> updateDuty(int oldDutyId, Duty newDuty) async {
     final db = await database;
 
     final rowsCount = await db.update(
