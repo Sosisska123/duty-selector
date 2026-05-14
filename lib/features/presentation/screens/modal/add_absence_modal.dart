@@ -1,8 +1,10 @@
+import 'dart:math';
+
 import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/absence_type.dart';
-import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/absence.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
+import 'package:duty_selector/utils/datetime_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
@@ -13,14 +15,15 @@ var logger = Logger();
 
 class AddAbsenceModal extends StatefulWidget {
   final ScrollController scrollController;
-  final DatabaseService databaseService;
   final int studentId;
+  final Function(Absence) onAbsenceAdded;
+  final int defaultDuration = 120;
 
   const AddAbsenceModal({
     super.key,
     required this.scrollController,
-    required this.databaseService,
     required this.studentId,
+    required this.onAbsenceAdded,
   });
 
   @override
@@ -28,19 +31,21 @@ class AddAbsenceModal extends StatefulWidget {
 }
 
 class _AddAbsenceModalState extends State<AddAbsenceModal> {
-  late final TextEditingController durationController;
-  late final TextEditingController lessonController;
-  late final TextEditingController dateController;
+  late final TextEditingController _durationController;
+  late final TextEditingController _lessonController;
+  late final TextEditingController _dateController;
 
-  String? absenceType;
-  DateTime selectedDate = .now();
+  String? _absenceType;
+  DateTime _selectedDate = .now();
 
   @override
   void initState() {
-    durationController = TextEditingController(text: "120");
-    lessonController = TextEditingController();
-    dateController = TextEditingController(
-      text: DateFormat('dd.MM.yyyy').format(selectedDate),
+    _durationController = TextEditingController(
+      text: widget.defaultDuration.toString(),
+    );
+    _lessonController = TextEditingController();
+    _dateController = TextEditingController(
+      text: DateFormat('dd.MM.yyyy HH:mm').format(_selectedDate),
     );
 
     super.initState();
@@ -48,9 +53,9 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
 
   @override
   void dispose() {
-    durationController.dispose();
-    lessonController.dispose();
-    dateController.dispose();
+    _durationController.dispose();
+    _lessonController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -76,20 +81,7 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
 
                 const SizedBox(height: AppSpacing.large),
 
-                DropdownMenu(
-                  label: const Text(
-                    'Тип пропуска',
-                    style: AppTextStyles.regular,
-                  ),
-                  initialSelection: 1,
-                  enableFilter: true,
-                  textStyle: AppTextStyles.regular,
-                  width: MediaQuery.of(context).size.width,
-                  dropdownMenuEntries: _entries(),
-                  onSelected: (value) {
-                    absenceType = _entries()[value! - 1].label;
-                  },
-                ),
+                _buildDropdown(context),
 
                 const SizedBox(height: AppSpacing.xsmall),
 
@@ -97,35 +89,15 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
 
                 const SizedBox(height: AppSpacing.xsmall),
 
-                TextField(
-                  autocorrect: true,
-                  decoration: InputDecoration(
-                    hintText: 'Длителность (в минутах)',
-                    hintStyle: AppTextStyles.smallAccent,
-                  ),
-                  style: AppTextStyles.regular,
-                  keyboardType: .number,
-                  controller: durationController,
-                ),
+                _buildDurationTextField(),
 
                 const SizedBox(height: AppSpacing.xsmall),
 
-                TextField(
-                  autocorrect: true,
-                  decoration: InputDecoration(
-                    hintText: 'Пара (необязательно)',
-                    hintStyle: AppTextStyles.smallAccent,
-                  ),
-                  style: AppTextStyles.regular,
-                  controller: lessonController,
-                ),
+                _buildLessonTextField(),
 
                 const SizedBox(height: AppSpacing.xsmall),
 
-                ElevatedButton(
-                  onPressed: () => addAbsence(context),
-                  child: const RegularText(text: 'Добавить'),
-                ),
+                _buildSubmitButton(context),
               ],
             ),
           ),
@@ -134,18 +106,86 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
     );
   }
 
+  DropdownMenu<int> _buildDropdown(BuildContext context) {
+    return DropdownMenu(
+      label: const Text('Тип пропуска', style: AppTextStyles.regular),
+      initialSelection: 0,
+      enableFilter: true,
+      textStyle: AppTextStyles.regular,
+      width: MediaQuery.of(context).size.width,
+      dropdownMenuEntries: _entries(),
+      onSelected: (value) {
+        _absenceType = _entries()[value! - 1].label;
+      },
+    );
+  }
+
+  TextField _buildDateField() {
+    return TextField(
+      controller: _dateController,
+      style: AppTextStyles.regular,
+      readOnly: true,
+      decoration: InputDecoration(
+        hintText: 'Дата',
+        hintStyle: AppTextStyles.smallAccent,
+        suffixIcon: IconButton(
+          onPressed: _pickDate,
+          icon: const Icon(Ionicons.calendar, color: AppColors.text),
+        ),
+      ),
+      onTap: _pickDate,
+    );
+  }
+
+  TextField _buildDurationTextField() {
+    return TextField(
+      decoration: InputDecoration(
+        hintText: 'Длителность (в минутах)',
+        hintStyle: AppTextStyles.smallAccent,
+      ),
+      style: AppTextStyles.regular,
+      keyboardType: .number,
+      onSubmitted: (value) {
+        if (_validateDuration(value)) _durationController.text = value;
+      },
+      controller: _durationController,
+    );
+  }
+
+  TextField _buildLessonTextField() {
+    return TextField(
+      autocorrect: true,
+      decoration: InputDecoration(
+        hintText: 'Пара (необязательно)',
+        hintStyle: AppTextStyles.smallAccent,
+      ),
+      style: AppTextStyles.regular,
+      controller: _lessonController,
+    );
+  }
+
+  ElevatedButton _buildSubmitButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => addAbsence(context),
+      child: const RegularText(text: 'Добавить'),
+    );
+  }
+
   Future<void> addAbsence(BuildContext context) async {
     final absence = Absence(
-      reason: absenceType ?? _entries()[0].label,
-      date: selectedDate,
+      reason: _absenceType ?? _entries()[0].label,
+      date: _selectedDate,
       studentId: widget.studentId,
-      expireDuration: int.tryParse(durationController.text) ?? 120,
-      lessonName: lessonController.text.isEmpty ? null : lessonController.text,
+      expireDuration: _validateDuration(_durationController.text)
+          ? int.parse(_durationController.text)
+          : widget.defaultDuration,
+      lessonName: _lessonController.text.isEmpty
+          ? null
+          : _lessonController.text,
     );
 
-    await widget.databaseService.addAbsence(absence);
+    widget.onAbsenceAdded.call(absence);
 
-    // TODO: make it update visually
     if (context.mounted) {
       PersistentNavBarNavigator.pop(context);
     }
@@ -167,43 +207,23 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
     return entries;
   }
 
-  TextField _buildDateField() {
-    return TextField(
-      controller: dateController,
-      style: AppTextStyles.regular,
-      readOnly: true,
-      decoration: InputDecoration(
-        hintText: 'Дата',
-        hintStyle: AppTextStyles.smallAccent,
-        suffixIcon: IconButton(
-          onPressed: _pickDate,
-          icon: const Icon(Ionicons.calendar, color: AppColors.text),
-        ),
-      ),
-      onTap: _pickDate,
-    );
-  }
-
   Future<void> _pickDate() async {
-    final date = await _selectDate(context, selectedDate);
+    final date = await selectDateTime(
+      context,
+      initialDate: _selectedDate,
+      dateMin: _selectedDate.subtract(const Duration(days: 365)),
+      dateMax: _selectedDate.add(const Duration(days: 365)),
+    );
 
     if (date == null) return;
 
     setState(() {
-      selectedDate = date;
-      dateController.text = DateFormat('dd.MM.yyyy').format(selectedDate);
+      _selectedDate = date;
+      _dateController.text = DateFormat(
+        'dd.MM.yyyy HH:mm',
+      ).format(_selectedDate);
     });
   }
-}
 
-Future<DateTime?> _selectDate(
-  final BuildContext context,
-  final DateTime initialDate,
-) async {
-  return await showDatePicker(
-    context: context,
-    initialDate: initialDate,
-    firstDate: initialDate.subtract(const Duration(days: 365)),
-    lastDate: initialDate.add(const Duration(days: 365)),
-  );
+  bool _validateDuration(String value) => min(int.tryParse(value) ?? 0, 0) > 0;
 }

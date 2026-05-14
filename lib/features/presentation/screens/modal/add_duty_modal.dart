@@ -1,7 +1,7 @@
 import 'package:duty_selector/design.dart';
-import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/duty.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
+import 'package:duty_selector/utils/datetime_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
@@ -9,14 +9,14 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class AddDutyModal extends StatefulWidget {
   final ScrollController scrollController;
-  final DatabaseService databaseService;
   final int studentId;
+  final Function(Duty) onDutyAdded;
 
   const AddDutyModal({
     super.key,
     required this.scrollController,
-    required this.databaseService,
     required this.studentId,
+    required this.onDutyAdded,
   });
 
   @override
@@ -115,45 +115,21 @@ class _AddDutyModalState extends State<AddDutyModal> {
   }
 
   Future<void> _pickDate() async {
-    final DateTime now = .now();
+    final date = await selectDateTime(
+      context,
+      initialDate: _selectedDate,
+      dateMin: _selectedDate.subtract(const Duration(days: 365)),
+      dateMax: _selectedDate.add(const Duration(days: 365)),
+    );
 
-    final DateTime? pickedDateTime =
-        await showDatePicker(
-          context: context,
-          initialDate: now,
-          firstDate: now.subtract(const Duration(days: 365)),
-          lastDate: now.add(const Duration(days: 365)),
-        ).then((selectedDate) async {
-          // After selecting the date, display the time picker.
-          if (selectedDate == null) return null;
-
-          return await pickTime(selectedDate);
-        });
-
-    if (pickedDateTime != null && pickedDateTime != _selectedDate) {
+    if (date != null && date != _selectedDate) {
       setState(() {
-        _selectedDate = pickedDateTime;
+        _selectedDate = date;
         _dateController.text = DateFormat(
           'dd.MM.yyyy HH:mm',
         ).format(_selectedDate);
       });
     }
-  }
-
-  Future<DateTime?> pickTime(DateTime selectedDate) async {
-    final selectedTime = await showTimePicker(
-      context: context,
-      initialTime: .now(),
-    );
-    if (selectedTime == null) return null;
-
-    return DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      selectedTime.hour,
-      selectedTime.minute,
-    );
   }
 
   Widget _buildSubmitButton() {
@@ -174,7 +150,7 @@ class _AddDutyModalState extends State<AddDutyModal> {
       studentId: widget.studentId,
     );
 
-    await widget.databaseService.addDuty(duty);
+    widget.onDutyAdded.call(duty);
 
     if (mounted) {
       PersistentNavBarNavigator.pop(context);

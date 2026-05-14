@@ -38,7 +38,8 @@ class _AbsencesHistoryState extends State<AbsencesHistory> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.secondary,
-        onPressed: () => _addAbsence(context, widget.databaseService),
+        onPressed: () =>
+            _showModal(context, widget.databaseService, widget.student.id!),
         child: const Icon(Ionicons.add, color: AppColors.text),
       ),
       body: FutureBuilder(
@@ -69,13 +70,6 @@ class _AbsencesHistoryState extends State<AbsencesHistory> {
     );
   }
 
-  void _addAbsence(
-    final BuildContext context,
-    final DatabaseService databaseService,
-  ) {
-    _showModal(context, databaseService, widget.student.id!);
-  }
-
   Future<List<Absence>> _getStudentAbsences() async =>
       await widget.databaseService.getWeekAbsencesFor(widget.student.id!);
 
@@ -92,6 +86,43 @@ class _AbsencesHistoryState extends State<AbsencesHistory> {
         _deleteAbsence(context, widget.databaseService, absence.id!);
       }),
       editCallback: () => snackText(context, 'Пока не работает'),
+    );
+  }
+
+  void _showModal(
+    final BuildContext context,
+    final DatabaseService databaseService,
+    final int studentId,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: .vertical(top: .circular(15)),
+      ),
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.4,
+          maxChildSize: 0.75,
+          expand: false,
+          snap: true,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return AddAbsenceModal(
+              scrollController: scrollController,
+              studentId: studentId,
+              onAbsenceAdded: (absence) async {
+                await widget.databaseService.addAbsence(absence);
+
+                setState(() {
+                  /* fetching db */
+                });
+              },
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -111,35 +142,4 @@ void _deleteAbsence(
 void snackText(final BuildContext context, final String text) {
   final snackBar = SnackBar(content: Text(text));
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-}
-
-void _showModal(
-  final BuildContext context,
-  final DatabaseService databaseService,
-  final int studentId,
-) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: .vertical(top: .circular(15)),
-    ),
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        minChildSize: 0.4,
-        maxChildSize: 0.75,
-        expand: false,
-        snap: true,
-        builder: (BuildContext context, ScrollController scrollController) {
-          return AddAbsenceModal(
-            databaseService: databaseService,
-            scrollController: scrollController,
-            studentId: studentId,
-          );
-        },
-      );
-    },
-  );
 }

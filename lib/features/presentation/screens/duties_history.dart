@@ -38,7 +38,8 @@ class _DutiesHistoryState extends State<DutiesHistory> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.secondary,
-        onPressed: () => _addDuty(context, widget.databaseService),
+        onPressed: () =>
+            _showModal(context, widget.databaseService, widget.student.id!),
         child: const Icon(Ionicons.add, color: AppColors.text),
       ),
       body: FutureBuilder(
@@ -69,13 +70,6 @@ class _DutiesHistoryState extends State<DutiesHistory> {
     );
   }
 
-  void _addDuty(
-    final BuildContext context,
-    final DatabaseService databaseService,
-  ) {
-    _showModal(context, databaseService, widget.student.id!);
-  }
-
   Future<List<Duty>> _getStudentDuties() async =>
       await widget.databaseService.getLastDutiesFor(widget.student.id!);
 
@@ -92,6 +86,42 @@ class _DutiesHistoryState extends State<DutiesHistory> {
         _deleteDuty(context, widget.databaseService, duty.id!);
       }),
       editCallback: () => snackText(context, 'Пока не работает'),
+    );
+  }
+
+  void _showModal(
+    final BuildContext context,
+    final DatabaseService databaseService,
+    final int studentId,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: .vertical(top: .circular(15)),
+      ),
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.4,
+          minChildSize: 0.3,
+          maxChildSize: 0.5,
+          expand: false,
+          snap: true,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return AddDutyModal(
+              scrollController: scrollController,
+              studentId: studentId,
+              onDutyAdded: (duty) async {
+                await widget.databaseService.addDuty(duty);
+                setState(() {
+                  /* fetching db */
+                });
+              },
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -111,35 +141,4 @@ void _deleteDuty(
 void snackText(final BuildContext context, final String text) {
   final snackBar = SnackBar(content: Text(text));
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-}
-
-void _showModal(
-  final BuildContext context,
-  final DatabaseService databaseService,
-  final int studentId,
-) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: .vertical(top: .circular(15)),
-    ),
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return DraggableScrollableSheet(
-        initialChildSize: 0.4,
-        minChildSize: 0.3,
-        maxChildSize: 0.5,
-        expand: false,
-        snap: true,
-        builder: (BuildContext context, ScrollController scrollController) {
-          return AddDutyModal(
-            databaseService: databaseService,
-            scrollController: scrollController,
-            studentId: studentId,
-          );
-        },
-      );
-    },
-  );
 }
