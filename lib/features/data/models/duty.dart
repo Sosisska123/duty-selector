@@ -16,7 +16,7 @@ class Duty {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
+      if (id != null) 'id': id,
       'duty_type': type,
       'date': date.toString(),
       'student_id': studentId,

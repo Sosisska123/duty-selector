@@ -7,8 +7,8 @@ import 'package:intl/intl.dart';
 
 class AbsenceHistoryCard extends StatelessWidget {
   final Absence absence;
-  final void Function()? deleteCallback;
-  final void Function()? editCallback;
+  final void Function(Absence)? deleteCallback;
+  final void Function(Absence)? editCallback;
 
   const AbsenceHistoryCard(
     this.absence, {
@@ -84,12 +84,12 @@ class AbsenceHistoryCard extends StatelessWidget {
           children: [
             ElevatedButton(
               style: ButtonStyle(side: WidgetStatePropertyAll(.none)),
-              onPressed: editCallback,
+              onPressed: () => editCallback?.call(absence),
               child: RegularText(text: 'Изменить'),
             ),
             ElevatedButton(
               style: ButtonStyle(side: WidgetStatePropertyAll(.none)),
-              onPressed: deleteCallback,
+              onPressed: () => deleteCallback?.call(absence),
               child: RegularText(text: 'Удалить'),
             ),
           ],

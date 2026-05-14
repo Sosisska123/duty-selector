@@ -2,6 +2,8 @@ import 'package:duty_selector/design.dart';
 import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/duty.dart';
 import 'package:duty_selector/features/data/models/student.dart';
+import 'package:duty_selector/features/presentation/screens/modal/add_duty_modal.dart';
+import 'package:duty_selector/features/presentation/screens/modal/edit_duty_modal.dart';
 import 'package:duty_selector/features/presentation/widgets/cards/duty_history_card.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
@@ -37,7 +39,7 @@ class _DutiesHistoryState extends State<DutiesHistory> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.secondary,
-        onPressed: () => _addDuty(context),
+        onPressed: () => showAddModal(context),
         child: const Icon(Ionicons.add, color: AppColors.text),
       ),
       body: FutureBuilder(
@@ -68,10 +70,6 @@ class _DutiesHistoryState extends State<DutiesHistory> {
     );
   }
 
-  void _addDuty(BuildContext context) {
-    snackText(context, 'Пока не работает');
-  }
-
   Future<List<Duty>> _getStudentDuties() async =>
       await widget.databaseService.getLastDutiesFor(widget.student.id!);
 
@@ -84,10 +82,82 @@ class _DutiesHistoryState extends State<DutiesHistory> {
 
     return DutyHistoryCard(
       duty,
-      deleteCallback: () => setState(() {
-        _deleteDuty(context, widget.databaseService, duty.id!);
+      deleteCallback: (d) => setState(() {
+        _deleteDuty(context, widget.databaseService, d.id!);
       }),
-      editCallback: () => snackText(context, 'Пока не работает'),
+      editCallback: (d) => showEditModal(context, d),
+    );
+  }
+
+  void showAddModal(final BuildContext context) {
+    final modal = DraggableScrollableSheet(
+      initialChildSize: 0.5,
+      minChildSize: 0.4,
+      maxChildSize: 0.75,
+      expand: false,
+      snap: true,
+      builder: (BuildContext context, ScrollController scrollController) {
+        return AddDutyModal(
+          scrollController: scrollController,
+          studentId: widget.student.id!,
+          onDutyAdded: (duty) async {
+            await widget.databaseService.addDuty(duty);
+
+            setState(() {
+              /* fetching db */
+            });
+          },
+        );
+      },
+    );
+
+    _showModal(context, modal: modal, databaseService: widget.databaseService);
+  }
+
+  void showEditModal(final BuildContext context, final Duty duty) {
+    final modal = DraggableScrollableSheet(
+      initialChildSize: 0.5,
+      minChildSize: 0.4,
+      maxChildSize: 0.75,
+      expand: false,
+      snap: true,
+      builder: (BuildContext context, ScrollController scrollController) {
+        return EditDutyModal(
+          scrollController: scrollController,
+          duty: duty,
+          onDutyChanged: (d) async {
+            if (duty.id == null) {
+              snackText(context, 'что-то пошло не так');
+            }
+
+            logger.i('Old duty: $duty');
+
+            await widget.databaseService.updateDuty(duty.id!, d);
+
+            setState(() {
+              /* fetching db */
+            });
+          },
+        );
+      },
+    );
+
+    _showModal(context, modal: modal, databaseService: widget.databaseService);
+  }
+
+  void _showModal(
+    final BuildContext context, {
+    required final DatabaseService databaseService,
+    required final Widget modal,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: .vertical(top: .circular(15)),
+      ),
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) => modal,
     );
   }
 }

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 ThemeData getTheme() {
   return ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+    colorScheme: .fromSeed(seedColor: AppColors.primary),
     primaryColor: AppColors.text,
     scaffoldBackgroundColor: AppColors.background,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.text,
     ),
@@ -14,20 +14,18 @@ ThemeData getTheme() {
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.text,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.small),
+          borderRadius: .circular(AppSpacing.small),
         ),
-        side: BorderSide(color: AppColors.border),
+        side: const BorderSide(color: AppColors.border),
         elevation: 0,
       ),
     ),
     expansionTileTheme: ExpansionTileThemeData(
       backgroundColor: AppColors.primary,
       collapsedBackgroundColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.small),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: .circular(AppSpacing.small)),
       collapsedShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.small),
+        borderRadius: .circular(AppSpacing.small),
       ),
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -36,9 +34,9 @@ ThemeData getTheme() {
       unselectedItemColor: AppColors.text.withValues(alpha: 0.5),
     ),
     dropdownMenuTheme: DropdownMenuThemeData(
-      textStyle: TextStyle(color: AppColors.text),
+      textStyle: const TextStyle(color: AppColors.text),
       inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: OutlineInputBorder(
+        focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.border),
         ),
         border: OutlineInputBorder(
@@ -51,16 +49,47 @@ ThemeData getTheme() {
       fillColor: AppColors.background,
 
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppRadius.medium),
-        borderSide: BorderSide(color: AppColors.border),
+        borderRadius: .circular(AppRadius.medium),
+        borderSide: const BorderSide(color: AppColors.border),
       ),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppRadius.medium),
-        borderSide: BorderSide(color: AppColors.border),
+        borderRadius: .circular(AppRadius.medium),
+        borderSide: const BorderSide(color: AppColors.border),
       ),
       hintStyle: AppTextStyles.accent,
     ),
-    snackBarTheme: SnackBarThemeData(backgroundColor: AppColors.secondary),
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: AppColors.secondary,
+    ),
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: AppColors.background,
+      todayForegroundColor: .all(AppColors.text),
+      dayForegroundColor: .all(AppColors.text),
+      yearForegroundColor: .all(AppColors.text),
+      dayStyle: AppTextStyles.regular,
+      toggleButtonTextStyle: AppTextStyles.regular,
+      weekdayStyle: const TextStyle(color: AppColors.text),
+      headerForegroundColor: AppColors.text,
+      locale: const Locale('ru', 'RU'),
+    ),
+    timePickerTheme: TimePickerThemeData(
+      backgroundColor: AppColors.background,
+      dayPeriodColor: AppColors.secondary,
+      dialBackgroundColor: AppColors.secondary,
+      dialTextColor: AppColors.text,
+      dialHandColor: AppColors.accent,
+      hourMinuteColor: AppColors.secondary,
+      dayPeriodTextColor: AppColors.text,
+      hourMinuteTextColor: AppColors.text,
+      confirmButtonStyle: ButtonStyle(
+        foregroundColor: .all(AppColors.text),
+        backgroundColor: .all(AppColors.secondary),
+      ),
+      cancelButtonStyle: ButtonStyle(
+        foregroundColor: .all(AppColors.text),
+        backgroundColor: .all(AppColors.secondary),
+      ),
+    ),
   );
 }
 

@@ -77,7 +77,10 @@ class AttendanceList extends StatelessWidget {
           builder: (BuildContext context, ScrollController scrollController) {
             return AddAbsenceModal(
               scrollController: scrollController,
-              databaseService: databaseService,
+              studentId: 1, // TODO:
+              onAbsenceAdded: (absence) async {
+                await databaseService.addAbsence(absence);
+              },
             );
           },
         );

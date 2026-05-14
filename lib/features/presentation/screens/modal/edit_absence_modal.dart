@@ -13,35 +13,41 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 var logger = Logger();
 
-class AddAbsenceModal extends StatefulWidget {
+class EditAbsenceModal extends StatefulWidget {
   final ScrollController scrollController;
-  final int studentId;
-  final Function(Absence) onAbsenceAdded;
+  final Function(Absence) onAbsenceChanged;
+  final Absence absence;
   final int defaultDuration = 120;
 
-  const AddAbsenceModal({
+  const EditAbsenceModal({
     super.key,
     required this.scrollController,
-    required this.studentId,
-    required this.onAbsenceAdded,
+    required this.absence,
+    required this.onAbsenceChanged,
   });
 
   @override
-  State<AddAbsenceModal> createState() => _AddAbsenceModalState();
+  State<EditAbsenceModal> createState() => _EditAbsenceModalState();
 }
 
-class _AddAbsenceModalState extends State<AddAbsenceModal> {
+class _EditAbsenceModalState extends State<EditAbsenceModal> {
   late final TextEditingController _durationController;
   late final TextEditingController _lessonController;
   late final TextEditingController _dateController;
 
-  String? _absenceType;
-  DateTime _selectedDate = .now();
+  late String _absenceType;
+  late DateTime _selectedDate;
+
+  late List<DropdownMenuEntry<String>> _entries = List.empty(growable: true);
 
   @override
   void initState() {
+    _entries = _entries.isEmpty ? _generateEntries() : _entries;
+    _absenceType = widget.absence.reason;
+    _selectedDate = widget.absence.date;
+
     _durationController = TextEditingController(
-      text: widget.defaultDuration.toString(),
+      text: widget.absence.expireDuration.toString(),
     );
     _lessonController = TextEditingController();
     _dateController = TextEditingController(
@@ -76,7 +82,7 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
               shrinkWrap: true,
               children: [
                 const Center(
-                  child: RegularText(text: 'Добавить запись о посещаемости'),
+                  child: RegularText(text: 'Изменить запись о посещаемости'),
                 ),
 
                 const SizedBox(height: AppSpacing.large),
@@ -106,16 +112,16 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
     );
   }
 
-  DropdownMenu<int> _buildDropdown(BuildContext context) {
-    return DropdownMenu(
+  DropdownMenu<String> _buildDropdown(BuildContext context) {
+    return DropdownMenu<String>(
       label: const Text('Тип пропуска', style: AppTextStyles.regular),
-      initialSelection: 0,
+      initialSelection: _absenceType,
       enableFilter: true,
       textStyle: AppTextStyles.regular,
       width: MediaQuery.of(context).size.width,
-      dropdownMenuEntries: _entries(),
+      dropdownMenuEntries: _entries,
       onSelected: (value) {
-        _absenceType = _entries()[value! - 1].label;
+        _absenceType = value ?? _absenceType;
       },
     );
   }
@@ -167,15 +173,15 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
   ElevatedButton _buildSubmitButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () => addAbsence(context),
-      child: const RegularText(text: 'Добавить'),
+      child: const RegularText(text: 'Изменить'),
     );
   }
 
   Future<void> addAbsence(BuildContext context) async {
     final absence = Absence(
-      reason: _absenceType ?? _entries()[0].label,
+      reason: _absenceType,
       date: _selectedDate,
-      studentId: widget.studentId,
+      studentId: widget.absence.studentId,
       expireDuration: _validateDuration(_durationController.text)
           ? int.parse(_durationController.text)
           : widget.defaultDuration,
@@ -184,24 +190,22 @@ class _AddAbsenceModalState extends State<AddAbsenceModal> {
           : _lessonController.text,
     );
 
-    widget.onAbsenceAdded.call(absence);
+    widget.onAbsenceChanged.call(absence);
 
     if (context.mounted) {
       PersistentNavBarNavigator.pop(context);
     }
   }
 
-  List<DropdownMenuEntry<int>> _entries() {
-    List<DropdownMenuEntry<int>> entries = List.empty(growable: true);
+  List<DropdownMenuEntry<String>> _generateEntries() {
+    List<DropdownMenuEntry<String>> entries = List.empty(growable: true);
 
-    for (var i = 0; i < AbsenceType.values.length; i++) {
-      var name = AbsenceType.values[i];
+    for (var aType in AbsenceType.values) {
+      if (aType == AbsenceType.selected || aType == AbsenceType.present) {
+        continue;
+      }
 
-      if (name == AbsenceType.selected || name == AbsenceType.present) continue;
-
-      entries.add(
-        DropdownMenuEntry(value: i, label: AbsenceType.values[i].name),
-      );
+      entries.add(DropdownMenuEntry(value: aType.name, label: aType.name));
     }
 
     return entries;
