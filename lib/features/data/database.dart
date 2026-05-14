@@ -216,8 +216,19 @@ class DatabaseService {
     return rowsCount;
   }
 
-  Future<int>? updateDuty(int oldDutyId, Duty newDuty) {
-    return null;
+  Future<int>? updateDuty(int oldDutyId, Duty newDuty) async {
+    final db = await database;
+
+    final rowsCount = await db.update(
+      'duties',
+      newDuty.toMap(),
+      where: 'id = ?',
+      whereArgs: [oldDutyId],
+    );
+
+    logger.i('New absence: $newDuty');
+
+    return rowsCount;
   }
 
   // absences
@@ -308,7 +319,7 @@ class DatabaseService {
     return results.map((row) => Absence.fromMap(row)).toList();
   }
 
-  Future removeLastAbsence(int studentId) async {
+  Future<void> removeLastAbsence(int studentId) async {
     final db = await database;
 
     await db.delete(
@@ -335,8 +346,19 @@ class DatabaseService {
     return rowsCount;
   }
 
-  Future<int>? updateAbsence(int oldAbsenceId, Absence newAbsence) {
-    return null;
+  Future<int> updateAbsence(int oldAbsenceId, Absence newAbsence) async {
+    final db = await database;
+
+    final rowsCount = await db.update(
+      'absences',
+      newAbsence.toMap(),
+      where: 'id = ?',
+      whereArgs: [oldAbsenceId],
+    );
+
+    logger.i('New absence: $newAbsence');
+
+    return rowsCount;
   }
 
   // endregion

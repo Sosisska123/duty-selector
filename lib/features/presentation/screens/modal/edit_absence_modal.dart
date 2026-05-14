@@ -38,7 +38,7 @@ class _EditAbsenceModalState extends State<EditAbsenceModal> {
   late String _absenceType;
   late DateTime _selectedDate;
 
-  late List<DropdownMenuEntry<int>> _entries = List.empty(growable: true);
+  late List<DropdownMenuEntry<String>> _entries = List.empty(growable: true);
 
   @override
   void initState() {
@@ -112,16 +112,16 @@ class _EditAbsenceModalState extends State<EditAbsenceModal> {
     );
   }
 
-  DropdownMenu<int> _buildDropdown(BuildContext context) {
-    return DropdownMenu(
+  DropdownMenu<String> _buildDropdown(BuildContext context) {
+    return DropdownMenu<String>(
       label: const Text('Тип пропуска', style: AppTextStyles.regular),
-      initialSelection: 0,
+      initialSelection: _absenceType,
       enableFilter: true,
       textStyle: AppTextStyles.regular,
       width: MediaQuery.of(context).size.width,
       dropdownMenuEntries: _entries,
       onSelected: (value) {
-        _absenceType = _entries[value! - 1].label;
+        _absenceType = value ?? _absenceType;
       },
     );
   }
@@ -173,7 +173,7 @@ class _EditAbsenceModalState extends State<EditAbsenceModal> {
   ElevatedButton _buildSubmitButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () => addAbsence(context),
-      child: const RegularText(text: 'Добавить'),
+      child: const RegularText(text: 'Изменить'),
     );
   }
 
@@ -197,17 +197,15 @@ class _EditAbsenceModalState extends State<EditAbsenceModal> {
     }
   }
 
-  List<DropdownMenuEntry<int>> _generateEntries() {
-    List<DropdownMenuEntry<int>> entries = List.empty(growable: true);
+  List<DropdownMenuEntry<String>> _generateEntries() {
+    List<DropdownMenuEntry<String>> entries = List.empty(growable: true);
 
-    for (var i = 0; i < AbsenceType.values.length; i++) {
-      var name = AbsenceType.values[i];
+    for (var aType in AbsenceType.values) {
+      if (aType == AbsenceType.selected || aType == AbsenceType.present) {
+        continue;
+      }
 
-      if (name == AbsenceType.selected || name == AbsenceType.present) continue;
-
-      entries.add(
-        DropdownMenuEntry(value: i, label: AbsenceType.values[i].name),
-      );
+      entries.add(DropdownMenuEntry(value: aType.name, label: aType.name));
     }
 
     return entries;

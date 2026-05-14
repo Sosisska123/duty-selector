@@ -135,7 +135,7 @@ class _EditDutyModalState extends State<EditDutyModal> {
   Widget _buildSubmitButton() {
     return ElevatedButton(
       onPressed: _saveDuty,
-      child: const RegularText(text: 'Добавить'),
+      child: const RegularText(text: 'Изменить'),
     );
   }
 

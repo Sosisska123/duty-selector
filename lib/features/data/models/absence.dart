@@ -17,7 +17,7 @@ class Absence {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
+      if (id != null) 'id': id,
       'expire_time': expireDuration,
       'reason': reason,
       'date': date.toIso8601String(),
