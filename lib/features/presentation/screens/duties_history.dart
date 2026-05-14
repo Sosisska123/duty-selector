@@ -127,9 +127,9 @@ void _showModal(
     backgroundColor: Colors.transparent,
     builder: (BuildContext context) {
       return DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        minChildSize: 0.4,
-        maxChildSize: 0.75,
+        initialChildSize: 0.4,
+        minChildSize: 0.3,
+        maxChildSize: 0.5,
         expand: false,
         snap: true,
         builder: (BuildContext context, ScrollController scrollController) {

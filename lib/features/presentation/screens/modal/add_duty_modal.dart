@@ -27,7 +27,6 @@ class _AddDutyModalState extends State<AddDutyModal> {
   late final TextEditingController _dateController;
   DateTime _selectedDate = .now();
   String? _selectedDutyType;
-  bool _isLoading = false;
 
   final List<DropdownMenuEntry<String>> _dutyEntries = const [
     DropdownMenuEntry(value: 'На улице', label: 'На улице'),
@@ -38,7 +37,7 @@ class _AddDutyModalState extends State<AddDutyModal> {
   void initState() {
     super.initState();
     _dateController = TextEditingController(
-      text: DateFormat('dd.MM.yyyy').format(_selectedDate),
+      text: DateFormat('dd.MM.yyyy HH:mm').format(_selectedDate),
     );
     if (_dutyEntries.isNotEmpty) {
       _selectedDutyType = _dutyEntries.first.value;
@@ -73,7 +72,7 @@ class _AddDutyModalState extends State<AddDutyModal> {
                 _buildDutyDropdown(),
                 const SizedBox(height: AppSpacing.xsmall),
                 _buildDateField(),
-                const SizedBox(height: AppSpacing.medium),
+                const SizedBox(height: AppSpacing.xsmall),
                 _buildSubmitButton(),
               ],
             ),
@@ -116,43 +115,58 @@ class _AddDutyModalState extends State<AddDutyModal> {
   }
 
   Future<void> _pickDate() async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
+    final DateTime now = .now();
 
-    if (pickedDate != null && pickedDate != _selectedDate) {
+    final DateTime? pickedDateTime =
+        await showDatePicker(
+          context: context,
+          initialDate: now,
+          firstDate: now.subtract(const Duration(days: 365)),
+          lastDate: now.add(const Duration(days: 365)),
+        ).then((selectedDate) async {
+          // After selecting the date, display the time picker.
+          if (selectedDate == null) return null;
+
+          return await pickTime(selectedDate);
+        });
+
+    if (pickedDateTime != null && pickedDateTime != _selectedDate) {
       setState(() {
-        _selectedDate = pickedDate;
-        _dateController.text = DateFormat('dd.MM.yyyy').format(_selectedDate);
+        _selectedDate = pickedDateTime;
+        _dateController.text = DateFormat(
+          'dd.MM.yyyy HH:mm',
+        ).format(_selectedDate);
       });
     }
   }
 
+  Future<DateTime?> pickTime(DateTime selectedDate) async {
+    final selectedTime = await showTimePicker(
+      context: context,
+      initialTime: .now(),
+    );
+    if (selectedTime == null) return null;
+
+    return DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
+  }
+
   Widget _buildSubmitButton() {
     return ElevatedButton(
-      onPressed: _isLoading ? null : _saveDuty,
-      child: _isLoading
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : const RegularText(text: 'Добавить'),
+      onPressed: _saveDuty,
+      child: const RegularText(text: 'Добавить'),
     );
   }
 
   Future<void> _saveDuty() async {
     if (_selectedDutyType == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Пожалуйста, выберите тип дежурства')),
-      );
-      return;
+      showSnack('Пожалуйста, выберите тип дежурства');
     }
-
-    setState(() => _isLoading = true);
 
     final duty = Duty(
       type: _selectedDutyType!,
@@ -160,22 +174,16 @@ class _AddDutyModalState extends State<AddDutyModal> {
       studentId: widget.studentId,
     );
 
-    try {
-      await widget.databaseService.addDuty(duty);
+    await widget.databaseService.addDuty(duty);
 
-      if (mounted) {
-        PersistentNavBarNavigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Ошибка сохранения: $e')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    if (mounted) {
+      PersistentNavBarNavigator.pop(context);
+    }
+  }
+
+  void showSnack(String text) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
     }
   }
 }
