@@ -60,6 +60,10 @@ class SettingsScreen extends StatelessWidget {
                   text: 'Очистить дежурства',
                   tapCallback: () => _clearDuties(databaseService),
                 ),
+                GroupButton(
+                  text: 'Вывести дежурства',
+                  tapCallback: () => _selectDuties(databaseService),
+                ),
               ],
             ),
         ],
@@ -71,6 +75,11 @@ class SettingsScreen extends StatelessWidget {
     final rowsCount = await databaseService.clear('duties');
     logger.d('Deleted $rowsCount from duties');
   }
+}
+
+void _selectDuties(DatabaseService databaseService) async {
+  var students = await databaseService.getDuties();
+  logger.i(students);
 }
 
 void _clearStudents(
