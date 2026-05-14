@@ -24,23 +24,30 @@ class AddDutyModal extends StatefulWidget {
 }
 
 class _AddDutyModalState extends State<AddDutyModal> {
-  late final TextEditingController dateController;
+  late final TextEditingController _dateController;
+  DateTime _selectedDate = .now();
+  String? _selectedDutyType;
+  bool _isLoading = false;
 
-  String dutyType = _entries()[0].label;
-  DateTime selectedDate = .now();
+  final List<DropdownMenuEntry<String>> _dutyEntries = const [
+    DropdownMenuEntry(value: 'На улице', label: 'На улице'),
+    DropdownMenuEntry(value: 'В кабинете', label: 'В кабинете'),
+  ];
 
   @override
   void initState() {
-    dateController = TextEditingController(
-      text: DateFormat('dd.MM.yyyy').format(selectedDate),
-    );
-
     super.initState();
+    _dateController = TextEditingController(
+      text: DateFormat('dd.MM.yyyy').format(_selectedDate),
+    );
+    if (_dutyEntries.isNotEmpty) {
+      _selectedDutyType = _dutyEntries.first.value;
+    }
   }
 
   @override
   void dispose() {
-    dateController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -48,7 +55,7 @@ class _AddDutyModalState extends State<AddDutyModal> {
   Widget build(BuildContext context) {
     return Container(
       alignment: .topCenter,
-      padding: .all(AppSpacing.medium),
+      padding: const .all(AppSpacing.medium),
       decoration: const BoxDecoration(
         color: AppColors.secondary,
         borderRadius: .vertical(top: .circular(AppSpacing.medium)),
@@ -61,79 +68,13 @@ class _AddDutyModalState extends State<AddDutyModal> {
               shrinkWrap: true,
               children: [
                 const Center(child: RegularText(text: 'Добавить дежурство')),
+                const SizedBox(height: AppSpacing.large),
 
-                SizedBox(height: AppSpacing.large),
-
-                DropdownMenu(
-                  label: Text('Тип дежурства', style: AppTextStyles.regular),
-                  initialSelection: 1,
-                  enableFilter: true,
-                  textStyle: AppTextStyles.regular,
-                  width: MediaQuery.of(context).size.width,
-                  dropdownMenuEntries: _entries(),
-                  onSelected: (value) {
-                    dutyType = _entries()[value! - 1].label;
-                  },
-                ),
-
+                _buildDutyDropdown(),
                 const SizedBox(height: AppSpacing.xsmall),
-
-                Stack(
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Дата',
-                        hintStyle: AppTextStyles.smallAccent,
-                      ),
-                      style: AppTextStyles.regular,
-                      readOnly: true,
-                      controller: dateController,
-                    ),
-                    Align(
-                      alignment: .centerEnd,
-                      child: IconButton(
-                        onPressed: () async {
-                          final date = await _selectDate(context, selectedDate);
-
-                          if (date == null) return;
-
-                          setState(() {
-                            selectedDate = date;
-                            dateController.text = DateFormat(
-                              'dd.MM.yyyy',
-                            ).format(selectedDate);
-                          });
-                        },
-                        icon: const Icon(
-                          Ionicons.calendar,
-                          color: AppColors.text,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: AppSpacing.xsmall),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    final duty = Duty(
-                      type: dutyType,
-                      date: selectedDate,
-                      studentId: widget.studentId,
-                    );
-
-                    logger.i(duty);
-
-                    await widget.databaseService.addDuty(duty);
-
-                    // TODO: make it update visually
-                    if (context.mounted) {
-                      PersistentNavBarNavigator.pop(context);
-                    }
-                  },
-                  child: const RegularText(text: 'Добавить'),
-                ),
+                _buildDateField(),
+                const SizedBox(height: AppSpacing.medium),
+                _buildSubmitButton(),
               ],
             ),
           ),
@@ -141,29 +82,100 @@ class _AddDutyModalState extends State<AddDutyModal> {
       ),
     );
   }
-}
 
-List<DropdownMenuEntry<int>> _entries() {
-  List<DropdownMenuEntry<int>> entries = List.empty(growable: true);
+  DropdownMenu<String> _buildDutyDropdown() {
+    return DropdownMenu<String>(
+      label: Text('Тип дежурства', style: AppTextStyles.regular),
+      initialSelection: _selectedDutyType,
+      textStyle: AppTextStyles.regular,
+      width: MediaQuery.of(context).size.width,
+      dropdownMenuEntries: _dutyEntries,
+      onSelected: (String? value) {
+        setState(() {
+          _selectedDutyType = value;
+        });
+      },
+    );
+  }
 
-  // TODO: Get entries from the file
+  TextField _buildDateField() {
+    return TextField(
+      controller: _dateController,
+      style: AppTextStyles.regular,
+      readOnly: true,
+      decoration: InputDecoration(
+        hintText: 'Дата',
+        hintStyle: AppTextStyles.smallAccent,
+        suffixIcon: IconButton(
+          onPressed: _pickDate,
+          icon: const Icon(Ionicons.calendar, color: AppColors.text),
+        ),
+      ),
+      onTap: _pickDate,
+    );
+  }
 
-  entries.add(const DropdownMenuEntry(value: 0, label: "На улице"));
-  entries.add(const DropdownMenuEntry(value: 1, label: "В кабинете"));
+  Future<void> _pickDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
 
-  return entries;
-}
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+        _dateController.text = DateFormat('dd.MM.yyyy').format(_selectedDate);
+      });
+    }
+  }
 
-Future<DateTime?> _selectDate(
-  final BuildContext context,
-  final DateTime initialDate,
-) async {
-  DateTime? pickedDate = await showDatePicker(
-    context: context,
-    initialDate: initialDate,
-    firstDate: initialDate.subtract(const Duration(days: 365)),
-    lastDate: initialDate.add(const Duration(days: 365)),
-  );
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _saveDuty,
+      child: _isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const RegularText(text: 'Добавить'),
+    );
+  }
 
-  return pickedDate;
+  Future<void> _saveDuty() async {
+    if (_selectedDutyType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Пожалуйста, выберите тип дежурства')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final duty = Duty(
+      type: _selectedDutyType!,
+      date: _selectedDate,
+      studentId: widget.studentId,
+    );
+
+    try {
+      await widget.databaseService.addDuty(duty);
+
+      if (mounted) {
+        PersistentNavBarNavigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ошибка сохранения: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 }
