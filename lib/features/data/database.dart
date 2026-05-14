@@ -216,7 +216,12 @@ class DatabaseService {
     return rowsCount;
   }
 
+  Future<int>? updateDuty(int oldDutyId, Duty newDuty) {
+    return null;
+  }
+
   // absences
+
   Future<bool> addAbsence(Absence absence) async {
     final db = await database;
 
@@ -328,6 +333,10 @@ class DatabaseService {
     logger.i('Delete absence $absenceId');
 
     return rowsCount;
+  }
+
+  Future<int>? updateAbsence(int oldAbsenceId, Absence newAbsence) {
+    return null;
   }
 
   // endregion

@@ -7,8 +7,8 @@ import 'package:intl/intl.dart';
 
 class DutyHistoryCard extends StatelessWidget {
   final Duty duty;
-  final void Function()? deleteCallback;
-  final void Function()? editCallback;
+  final void Function(Duty)? deleteCallback;
+  final void Function(Duty)? editCallback;
 
   const DutyHistoryCard(
     this.duty, {
@@ -67,12 +67,12 @@ class DutyHistoryCard extends StatelessWidget {
           children: [
             ElevatedButton(
               style: ButtonStyle(side: WidgetStatePropertyAll(.none)),
-              onPressed: editCallback,
+              onPressed: () => editCallback?.call(duty),
               child: const RegularText(text: 'Изменить'),
             ),
             ElevatedButton(
               style: const ButtonStyle(side: WidgetStatePropertyAll(.none)),
-              onPressed: deleteCallback,
+              onPressed: () => deleteCallback?.call(duty),
               child: const RegularText(text: 'Удалить'),
             ),
           ],

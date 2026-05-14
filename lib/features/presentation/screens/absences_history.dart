@@ -3,6 +3,7 @@ import 'package:duty_selector/features/data/database.dart';
 import 'package:duty_selector/features/data/models/absence.dart';
 import 'package:duty_selector/features/data/models/student.dart';
 import 'package:duty_selector/features/presentation/screens/modal/add_absence_modal.dart';
+import 'package:duty_selector/features/presentation/screens/modal/edit_absence_modal.dart';
 import 'package:duty_selector/features/presentation/widgets/cards/absence_history_card.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/accent_text.dart';
 import 'package:duty_selector/features/presentation/widgets/texts/regular_text.dart';
@@ -38,8 +39,7 @@ class _AbsencesHistoryState extends State<AbsencesHistory> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.secondary,
-        onPressed: () =>
-            _showModal(context, widget.databaseService, widget.student.id!),
+        onPressed: () => showAddModal(context),
         child: const Icon(Ionicons.add, color: AppColors.text),
       ),
       body: FutureBuilder(
@@ -82,18 +82,74 @@ class _AbsencesHistoryState extends State<AbsencesHistory> {
 
     return AbsenceHistoryCard(
       absence,
-      deleteCallback: () => setState(() {
-        _deleteAbsence(context, widget.databaseService, absence.id!);
+      deleteCallback: (a) => setState(() {
+        _deleteAbsence(context, widget.databaseService, a.id!);
       }),
-      editCallback: () => snackText(context, 'Пока не работает'),
+      editCallback: (a) => showEditModal(context, a),
     );
   }
 
+  void showAddModal(final BuildContext context) {
+    final modal = DraggableScrollableSheet(
+      initialChildSize: 0.5,
+      minChildSize: 0.4,
+      maxChildSize: 0.75,
+      expand: false,
+      snap: true,
+      builder: (BuildContext context, ScrollController scrollController) {
+        return AddAbsenceModal(
+          scrollController: scrollController,
+          studentId: widget.student.id!,
+          onAbsenceAdded: (absence) async {
+            await widget.databaseService.addAbsence(absence);
+
+            setState(() {
+              /* fetching db */
+            });
+          },
+        );
+      },
+    );
+
+    _showModal(context, modal: modal, databaseService: widget.databaseService);
+  }
+
+  void showEditModal(final BuildContext context, final Absence absence) {
+    final modal = DraggableScrollableSheet(
+      initialChildSize: 0.5,
+      minChildSize: 0.4,
+      maxChildSize: 0.75,
+      expand: false,
+      snap: true,
+      builder: (BuildContext context, ScrollController scrollController) {
+        return EditAbsenceModal(
+          scrollController: scrollController,
+          absence: absence,
+          onAbsenceChanged: (a) async {
+            if (absence.id == null) {
+              snackText(context, 'что-то пошло не так');
+            }
+
+            logger.i('Old absence: $absence');
+
+            await widget.databaseService.updateAbsence(absence.id!, a);
+
+            setState(() {
+              /* fetching db */
+            });
+          },
+        );
+      },
+    );
+
+    _showModal(context, modal: modal, databaseService: widget.databaseService);
+  }
+
   void _showModal(
-    final BuildContext context,
-    final DatabaseService databaseService,
-    final int studentId,
-  ) {
+    final BuildContext context, {
+    required final DatabaseService databaseService,
+    required final Widget modal,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -101,28 +157,7 @@ class _AbsencesHistoryState extends State<AbsencesHistory> {
         borderRadius: .vertical(top: .circular(15)),
       ),
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          minChildSize: 0.4,
-          maxChildSize: 0.75,
-          expand: false,
-          snap: true,
-          builder: (BuildContext context, ScrollController scrollController) {
-            return AddAbsenceModal(
-              scrollController: scrollController,
-              studentId: studentId,
-              onAbsenceAdded: (absence) async {
-                await widget.databaseService.addAbsence(absence);
-
-                setState(() {
-                  /* fetching db */
-                });
-              },
-            );
-          },
-        );
-      },
+      builder: (BuildContext context) => modal,
     );
   }
 }
