@@ -73,6 +73,7 @@ ThemeData getTheme() {
       locale: const Locale('ru', 'RU'),
     ),
     timePickerTheme: TimePickerThemeData(
+      helpTextStyle: TextStyle(color: AppColors.text),
       backgroundColor: AppColors.background,
       dayPeriodColor: AppColors.secondary,
       dialBackgroundColor: AppColors.secondary,
